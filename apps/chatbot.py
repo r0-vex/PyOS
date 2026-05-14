@@ -1,12 +1,3 @@
-#iloveyou#i love you more!
-#rohith=True
-#while True:
-    #if not rohith:
-     #   break
-    #print("I LOVE YOU")
-
-#madam np it won't stop running.........
-#😁😁#i cant run it .wait 
 def respond(text):
     text=text.lower().strip()
     if"hello" in text or "hi" in text:
