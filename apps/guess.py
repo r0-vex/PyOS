@@ -11,10 +11,10 @@ cache=[]
 
 def main(username,path):
     try:
-        if not (os.path.isdir(f"{path}\\{APP_PATH}")):
-            os.mkdir(f"{path}\\{APP_PATH}")
-        if not (os.path.isfile(f"{path}\\{APP_PATH}\\scores.json")):
-            with open(path+f"\\{APP_PATH}\\scores.json","w") as source:
+        if not (os.path.isdir(os.path.join(path,APP_PATH))):
+            os.mkdir(os.path.join(path,APP_PATH))
+        if not (os.path.isfile(os.path.join(path,APP_PATH,"scores.json"))):
+            with open(os.path.join(path,APP_PATH,"scores.json"),"w") as source:
                 source.write(json.dumps(DEF_SCORE_FILE))
     except Exception as GUESSError:
         print(f"GUESS APP ERROR: {GUESSError}")
@@ -22,7 +22,7 @@ def main(username,path):
     def load_score():
         global score_dict
         try:
-            with open(path+f"\\{APP_PATH}\\scores.json") as score_json:
+            with open(os.path.join(path,APP_PATH,"scores.json")) as score_json:
                 score_dict=json.loads(score_json.read())
         except FileNotFoundError:
             print("Scores can't be loaded!")
@@ -32,7 +32,7 @@ def main(username,path):
     def dump_score():
         global score_dict
         try:
-            with open(path+f"\\{APP_PATH}\\scores.json","w") as score_json:
+            with open(os.path.join(path,APP_PATH,"scores.json"),"w") as score_json:
                 score_json.write(json.dumps(score_dict))
         except FileNotFoundError:
             print("Scores can't be updated!")
@@ -267,11 +267,11 @@ $$ |  $$ |$$ |  $$ |$$ |      $$\   $$ |$$\   $$ |
 
     def view_score():
         load_score()
-        print("\n ### HIGH SCORES ###\n")
+        print("\n-------HIGH SCORES-------\n")
         print("Easy:",score_dict["easy"])
         print("Hard:",score_dict["hard"])
         print("Very Hard:",score_dict["very_hard"])
-        print("\n ###     ###\n")
+        print("\n-------------------------")
 
     def menu():
         print("\n1.EASY LEVEL")

@@ -17,6 +17,7 @@ from datetime import datetime
 #PyOS->system->backup->logs->backup logs
 
 PyOS_path=os.getcwd()
+whitelist_ext=["txt","json","csv","py","bin"]
 
 class log():
     def __init__(self,name,path,console_level=logging.WARNING, file_level=logging.DEBUG):
@@ -30,7 +31,7 @@ class log():
         console_handler=logging.StreamHandler() #setting consoler
         console_handler.setLevel(console_level)
 
-        file_handler=logging.FileHandler(os.getcwd()+path,"a+",encoding="utf-8") #setting file handler
+        file_handler=logging.FileHandler(os.path.join(os.getcwd(),path),"a+",encoding="utf-8") #setting file handler
         file_handler.setLevel(file_level)
 
         formatter=logging.Formatter("%(asctime)s: %(levelname)s: %(name)s: %(message)s") #log format
@@ -41,14 +42,14 @@ class log():
         self.logger.addHandler(file_handler)
         self.logger.addHandler(console_handler) #setting handlers to logger
 
-sys_log=log("System Log","\\system\\log.txt").logger
+sys_log=log("System Log",os.path.join("system","log.txt")).logger
 
 class file(log):
     def create_dir(path):
         try:
-            if not (os.path.exists(os.getcwd()+path)):
-                os.mkdir(os.getcwd()+path)
-                sys_log.info(os.getcwd()+path+" Directory Created")
+            if not (os.path.exists(os.path.join(os.getcwd(),path))):
+                os.mkdir(os.path.join(os.getcwd(),path))
+                sys_log.info(os.path.join(os.getcwd(),path)+" Directory Created")
         except FileExistsError:
             sys_log.error("ERROR 2a: Directory Exists")
         except Exception as FileCreationError:
@@ -83,27 +84,27 @@ class file(log):
 class user_files_creation():
     def create_user_files(username,mode="user"):
         try:
-            user_path=os.getcwd()+"\\users\\"+username
-            config_path=os.getcwd()+"\\system\\backup\\configs\\"
-            system_path=user_path+"\\system"
-            file.create_dir("\\users\\"+username)
-            file.create_dir("\\users\\"+username+"\\system")
-            file.create_dir("\\users\\"+username+"\\apps")
-            file.create_dir("\\system\\backup\\users\\"+username)
+            user_path=os.path.join(os.getcwd(),"users",username)
+            config_path=os.path.join(os.getcwd(),"system","backup","configs")
+            system_path=os.path.join(user_path,"system")
+            file.create_dir(os.path.join("users",username))
+            file.create_dir(os.path.join("users",username,"system"))
+            file.create_dir(os.path.join("users",username,"apps"))
+            file.create_dir(os.path.join("system","backup","users",username))
             curr_date_time=f"{datetime.now().strftime('%d %B %Y')} {datetime.now().strftime('%I:%M:%S %p')}"
             if mode=="user":
-                with open(config_path+"userconfig.json") as user_settings:
+                with open(os.path.join(config_path,"userconfig.json")) as user_settings:
                     loaded_user_config=json.loads(user_settings.read())
             else:
-                with open(config_path+"adminconfig.json") as user_settings:
+                with open(os.path.join(config_path,"adminconfig.json")) as user_settings:
                     loaded_user_config=json.loads(user_settings.read())
             loaded_user_config["created_on"]=curr_date_time
-            if not (os.path.isfile(system_path+"\\config.json")):
-                with open(system_path+"\\config.json","w") as user_config:
+            if not (os.path.isfile(os.path.join(system_path,"config.json"))):
+                with open(os.path.join(system_path,"config.json"),"w") as user_config:
                     user_config.write(json.dumps(loaded_user_config))
                 sys_log.info("config.json has been created for "+username)
-            if not (os.path.isfile(system_path+"\\log.txt")):
-                open(system_path+"\\log.txt","w").close()
+            if not (os.path.isfile(os.path.join(system_path,"log.txt"))):
+                open(os.path.join(system_path,"log.txt"),"w").close()
                 sys_log.info("log.txt has been created for "+username)
         except Exception as UserFileCreationError:
             sys_log.error("ERROR 2c: "+str(UserFileCreationError))

@@ -5,17 +5,24 @@ import auth,fs,commands
 import sys
 
 boot_start=time.time() #boot time
-sys_log=fs.log("System Log","\\system\\log.txt").logger
-
+sys_log=fs.log("System Log",os.path.join("system","log.txt")).logger
+try:
+    config_path=os.path.join(os.getcwd(),"system","config.json")
+    with open(config_path) as ver_conf:
+        version_no=json.loads(ver_conf.read())["version"]
+except FileNotFoundError:
+    sys_log.error("ERROR 0: Unable to load config file")
+except Exception as BootError:
+    sys_log.error("ERROR 0: Unable to load PyOS version "+str(BootError))
 
 sys_log.info("Boot Started")
 
 try:
-    curr_date_time=f"{commands._date_(None)} {commands._time_("--12")[-1:-12:-1][::-1]}"
+    curr_date_time=f"{commands._date_(None)} {commands._time_(["--12"])[-1:-12:-1][::-1]}"
 except:
     sys_log.error("Unable to load date and time")
      
-os.system("title PyOS v2.0")
+os.system(f"title PyOS {version_no}")
 time.sleep(1)
 
 print(r"""  _____        ____   _____        ___    ___  
@@ -28,7 +35,7 @@ print(r"""  _____        ____   _____        ___    ___
         |___/                                  """)
 
 time.sleep(1)
-print("Booting PyOS v2.0 . ",end="")
+print(f"Booting PyOS {version_no} . ",end="")
 for _ in range(5):
     time.sleep(0.5)
     print(". ",end="",flush=True)
@@ -37,7 +44,6 @@ print()
 print("Checking Python Version. ",end="")
 #checking python version
 try:
-    config_path=os.getcwd()+"\\system\\config.json"
     with open(config_path) as py_sys_config: 
         py_config=json.loads(py_sys_config.read())
         version=sys.version.split()[0]
@@ -75,15 +81,16 @@ try:
     print("Loading kernel modules. ",end="")      
     required_files=["fs.py","commands.py","auth.py","security.py"]
     for file in required_files:
-        if not (os.path.isfile(os.getcwd() + "\\" + file)):
+        if not (os.path.isfile(os.path.join(os.getcwd(),file))):
             print(f"{file}: Not Found")
             #troubleshoot
             raise FileNotFoundError
     if not boot_flag:
-        if not (os.path.isdir(os.getcwd() + "\\users")):
+        if not (os.path.isdir(os.path.join(os.getcwd(),"users"))):
             raise FileNotFoundError
     else:
-        fs.file.create_dir("\\users")
+        fs.file.create_dir("users")
+        fs.file.create_dir(os.path.join("system","backup","users"))
     sys_log.info("OS files loaded.")
     for _ in range(8):
         time.sleep(0.5)
@@ -91,9 +98,10 @@ try:
     print()  
 #loading apps
     print("Loading apps. ",end="",flush=True)
-    if not (os.path.isdir(os.getcwd()+"\\apps")):
+    if not (os.path.isdir(os.path.join(os.getcwd(),"apps"))):
          raise FileNotFoundError
-    boot_py_config["apps"]=os.listdir(os.getcwd()+"\\apps")
+    apps_list= [app for app in os.listdir(os.path.join(os.getcwd(),"apps")) if app not in commands.blacklist_apps and app.endswith(".py")]
+    boot_py_config["apps"]=apps_list
     with open(config_path,"w") as py_sys_config:
         py_sys_config.write(json.dumps(boot_py_config))
     for _ in range(3):
@@ -124,7 +132,7 @@ if __name__=="__main__":
     while True:
         try:
 
-            with open(os.getcwd()+"\\system\\config.json") as file:
+            with open(os.path.join(os.getcwd(),"system","config.json")) as file:
                 boot_sys_config=json.loads(file.read())
                 boot_flag=boot_sys_config["boot_flag"]
 
@@ -151,12 +159,12 @@ if __name__=="__main__":
             
             if login_flag:
                 curr_user=auth.login.current_user
-                user_log=fs.log(f"{curr_user} Log",f"\\users\\{curr_user}\\system\\log.txt").logger
-                with open(os.getcwd()+auth.login.current_dir+"\\system\\config.json") as load_user_config:
+                user_log=fs.log(f"{curr_user} Log",os.path.join("users",curr_user,"system","log.txt")).logger
+                with open(os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json")) as load_user_config:
                     user_config=json.loads(load_user_config.read())
                     os.system(user_config["color"])
                     user_config["python_version"]=version
-                with open(os.getcwd()+"\\users\\"+curr_user+"\\system\\config.json","w") as py_user_config:
+                with open(os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json"),"w") as py_user_config:
                     py_user_config.write(json.dumps(user_config))
                 if auth.login.current_user and auth.login.current_role!="admin":
                     locked=user_config["locked"]
@@ -174,7 +182,7 @@ if __name__=="__main__":
                         if login_flag and auth.login.current_role=="admin":
                             user_config["lock_until"]=0
                             user_config["locked"]=False
-                            with open(os.getcwd()+"\\users\\"+curr_user+"\\system\\config.json","w") as py_user_config:
+                            with open(os.path.join(os.getcwd(),"users",curr_user,"system","config.json"),"w") as py_user_config:
                                 py_user_config.write(json.dumps(user_config))
                             sys_log.info(curr_user+" lock removed!")
                             user_log.info("OS Lock Removed!")
@@ -198,7 +206,7 @@ if __name__=="__main__":
                     sys_log.info(auth.login.current_user+" logged in...")
                     print("\nLogin Successfull.")
                     os.system("cls")
-                    print("PyOS [version 2.0.00]\n(info) Python based kernel os.") 
+                    print("PyOS [version 2.0.00]\n(info) Python based kernel os simulator.") 
                     commands.assign()
             #shell loop 
                     while True:
@@ -225,13 +233,13 @@ if __name__=="__main__":
                         break
             else:
                 if auth.login.current_user and auth.login.current_user != boot_sys_config["admin"]:
-                    user_log=fs.log(f"{auth.login.current_user} Log","\\users\\"+auth.login.current_user+"\\system\\log.txt").logger
-                    with open(os.getcwd()+auth.login.current_dir+"\\system\\config.json") as load_user_config:
+                    user_log=fs.log(f"{auth.login.current_user} Log",os.path.join(auth.login.current_dir,"system","log.txt")).logger
+                    with open(os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json")) as load_user_config:
                         user_config=json.loads(load_user_config.read())
                     user_config["lock_until"]=time.time()+300
                     user_config["locked"]=True
                     user_config["version"]=version
-                    with open(os.getcwd()+auth.login.current_dir+"\\system\\config.json","w") as py_user_config:
+                    with open(os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json"),"w") as py_user_config:
                         py_user_config.write(json.dumps(user_config))
                     user_log.critical("OS set to Locked!")
                     sys_log.critical(auth.login.current_user+" OS set to Locked!")
@@ -242,7 +250,7 @@ if __name__=="__main__":
                 break
         except FileNotFoundError:
             sys_log.critical(f"{auth.login.current_user} Config Not Found")
-            user_log=fs.log(f"{auth.login.current_user} Log","\\users\\"+auth.login.current_user+"\\system\\log.txt").logger
+            user_log=fs.log(f"{auth.login.current_user} Log",os.path.join(auth.login.current_dir,"system","log.txt")).logger
             user_log.critical("User Config Not Found")
         except KeyboardInterrupt:
             print("Shutting down. ",end="")

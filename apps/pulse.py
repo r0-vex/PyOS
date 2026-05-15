@@ -1,61 +1,69 @@
+import os
 import random
+import json
 import commands
 import auth
-import os
+import fs
 
 
 class Pulse:
-
     def __init__(self, username):
-
-        self.name = "Pulse"
-        self.version = "v2.0"
         self.username = username
-
+        self.name = "Pulse"
+        self.version = "v3.0"
         # memory
         self.current_topic = None
         self.last_command = None
-        self.last_app = None
         self.last_problem = None
-
+        self.last_app = None
+        # load dynamic system data
+        self.commands = commands.cmds
+        self.apps = self.load_apps()
         # intents
-        self.greetings = {"hi", "hello", "hey", "yo", "yoo"}
-        self.byes = {"bye", "cya", "goodbye", "exit"}
-
-        # troubleshooting database
+        self.greetings = {
+            "hi", "hello", "hey", "yo", "yoo"
+        }
+        self.byes = {
+            "bye", "exit", "cya", "goodbye"
+        }
+        # dangerous commands
+        self.dangerous_cmds = {
+            "delete",
+            "deluser",
+            "shutdown",
+            "reset"
+        }
+        # troubleshooting db
         self.troubleshoot = {
-
             "wifi": {
                 "causes": [
-                    "DNS failure",
+                    "DNS issue",
                     "adapter disabled",
-                    "IP conflict"
+                    "router unreachable"
                 ],
-
-                "solutions": [
-                    "Reconnect wifi",
+                "fixes": [
+                    "Reconnect network",
                     "Restart router",
-                    "Check DNS settings"
+                    "Refresh adapter"
                 ],
-
                 "commands": [
                     "ping",
-                    "ifconfig",
-                    "netstat"
+                    "netstat",
+                    "ifconfig"
                 ]
             },
 
             "disk": {
                 "causes": [
-                    "Storage full",
-                    "Filesystem corruption",
-                    "Too many junk files"
+                    "Low storage",
+                    "filesystem corruption",
+                    "junk files"
                 ],
 
-                "solutions": [
+                "fixes": [
                     "Delete unnecessary files",
-                    "Check filesystem",
-                    "Clean storage"
+                    "Clean temporary data",
+                    "Check storage usage"
                 ],
 
                 "commands": [
@@ -68,11 +76,11 @@ class Pulse:
             "performance": {
                 "causes": [
                     "High CPU usage",
-                    "Low memory",
-                    "Too many background apps"
+                    "Low RAM",
+                    "Too many apps"
                 ],
 
-                "solutions": [
+                "fixes": [
                     "Close apps",
                     "Restart PyOS",
                     "Reduce background tasks"
@@ -84,104 +92,144 @@ class Pulse:
                 ]
             }
         }
+    # ------------------------------
+    # load apps
+    # ------------------------------
+    def load_apps(self):
 
-        # command explanations
-        self.command_help = {
+        try:
+            return os.listdir(os.path.join(os.getcwd(),"apps"))
 
-            "help": "Shows all commands.\nUsage: help",
+        except Exception:
+            return []
 
-            "count": (
-                "Counts words, letters and lines.\n"
-                "Examples:\n"
-                "count -w notes.txt\n"
-                "count -line notes.txt"
-            ),
+    # ------------------------------
+    # tokenize
+    # ------------------------------
 
-            "ls": "Lists files and folders.\nUsage: ls",
-
-            "delete": "Deletes a file.\nUsage: delete file.txt",
-
-            "mkdir": "Creates a folder.\nUsage: mkdir projects",
-
-            "run": "Runs PyOS apps.\nUsage: run notes",
-
-            "whoami": "Displays current user.",
-
-            "matrix": "Starts matrix mode 😈",
-
-            "quote": "Displays random quote.",
-
-            "shutdown": "Shuts down PyOS safely."
-        }
-
-        # app aliases
-        self.apps = {
-            "vault": "run vault",
-            "notes": "run notes",
-            "guess": "run guess",
-            "pulse": "run pulse"
-        }
-
-    # tokenize input
     def tokenize(self, text):
         return text.lower().strip().split()
 
-    # check word
-    def contains(self, words, targets):
-        return any(word in targets for word in words)
+    # ------------------------------
+    # greeting
+    # ------------------------------
 
-    # greeting handler
     def handle_greeting(self):
 
         replies = [
+
             f"Hey {self.username} 😄",
-            f"Yo {self.username}.",
+
             f"Welcome back {self.username}.",
+
             "Pulse online.",
+
             "Ready to assist."
         ]
 
         return random.choice(replies)
+    # ------------------------------
+    # farewell
+    # ------------------------------
 
-    # bye handler
     def handle_bye(self):
-
         replies = [
-            "See ya 😄",
-            "Pulse signing off.",
-            "Logging out of conversation.",
-            "Catch you later."
-        ]
 
+            "Pulse signing off.",
+
+            "See ya 😄",
+
+            "Logging out of conversation."
+        ]
         return random.choice(replies)
 
-    # command list
+    # -----------------------------
+    # show commands
+    # ------------------------------
+
     def available_commands(self):
 
-        try:
+        cmd_list = list(self.commands.keys())
 
-            cmd_list = list(commands.cmds.keys())
+        return (
+            "Available Commands:\n\n" +
+            "\n".join(cmd_list)
+        )
 
-            return (
-                "Available Commands:\n\n" +
-                "\n".join(cmd_list)
-            )
-
-        except Exception:
-            return "Unable to load commands."
-
+    # ------------------------------
     # explain command
+    # ------------------------------
+
     def explain_command(self, words):
 
-        for cmd in self.command_help:
+        for cmd in self.commands:
 
             if cmd in words:
+
                 self.last_command = cmd
-                return self.command_help[cmd]
+
+                cmd_info = self.commands[cmd]
+
+                permission = cmd_info["permission"]
+
+                return (
+                    f"Command: {cmd}\n"
+                    f"Permission: {permission}"
+                )
 
         return None
 
-    # troubleshooting engine
+    # ------------------------------
+    # execute commands
+    # ------------------------------
+
+    def execute_command(self, cmd):
+
+        try:
+
+            self.last_command = cmd
+
+            if cmd in self.dangerous_cmds:
+
+                confirm = input(
+                    f"Pulse> Dangerous command '{cmd}'. Continue? (y/n): "
+                )
+
+                if confirm.lower() != "y":
+                    return "Command aborted."
+
+            commands.execute(cmd)
+
+            return f"Executed: {cmd}"
+
+        except Exception as CommandError:
+
+            return f"Execution Error: {CommandError}"
+
+    # ------------------------------
+    # open apps
+    # ------------------------------
+
+    def open_app(self, words):
+
+        for app in self.apps:
+
+            app_name = app.replace(".py", "")
+
+            if app_name in words:
+
+                self.last_app = app_name
+
+                commands.execute(f"run {app_name}")
+
+                return f"Launching {app_name}..."
+
+        return None
+
+    # ------------------------------
+    # troubleshoot
+    # ------------------------------
+
     def diagnose(self, issue):
 
         self.current_topic = issue
@@ -193,8 +241,8 @@ class Pulse:
             [f"- {x}" for x in data["causes"]]
         )
 
-        solutions = "\n".join(
-            [f"- {x}" for x in data["solutions"]]
+        fixes = "\n".join(
+            [f"- {x}" for x in data["fixes"]]
         )
 
         cmds = "\n".join(
@@ -202,65 +250,99 @@ class Pulse:
         )
 
         return (
+            f"Problem Detected: {issue}\n\n"
             f"Possible Causes:\n{causes}\n\n"
-            f"Solutions:\n{solutions}\n\n"
-            f"Useful Commands:\n{cmds}"
+            f"Possible Fixes:\n{fixes}\n\n"
+            f"Recommended Commands:\n{cmds}"
         )
 
-    # launch apps
-    def open_app(self, words):
+    # ------------------------------
+    # auto fix
+    # ------------------------------
 
-        for app in self.apps:
+    def auto_fix(self, issue):
 
-            if app in words:
+        if issue == "wifi":
 
-                self.last_app = app
+            return (
+                "Attempting network recovery...\n"
+                "Refreshing adapter...\n"
+                "DNS cache cleared."
+            )
 
-                try:
-                    commands.execute(self.apps[app])
-                    return f"Launching {app}..."
+        elif issue == "disk":
 
-                except Exception as AppError:
-                    return f"App Launch Error: {AppError}"
+            return (
+                "Analyzing storage...\n"
+                "Junk file scan completed."
+            )
+
+        elif issue == "performance":
+
+            return (
+                "Checking background apps...\n"
+                "Memory optimization recommended."
+            )
+
+        return "Unable to auto-fix problem."
+
+    # ------------------------------
+    # analyze logs
+    # ------------------------------
+
+    def analyze_logs(self):
+
+        try:
+
+            log_path = os.path.join(os.getcwd(),"system","log.txt")
+
+            with open(log_path, "r") as file:
+
+                logs = file.readlines()
+
+            recent = logs[-5:]
+
+            return (
+                "Recent System Logs:\n\n" +
+                "".join(recent)
+            )
+
+        except Exception:
+
+            return "Unable to analyze logs."
+
+    # ------------------------------
+    # contextual memory
+    # ------------------------------
+
+    def contextual_reply(self, text):
+
+        if text == "how":
+
+            if self.current_topic == "wifi":
+
+                return (
+                    "Try:\n"
+                    "1. reconnect wifi\n"
+                    "2. restart router\n"
+                    "3. refresh adapter"
+                )
+
+            elif self.current_topic == "disk":
+
+                return (
+                    "Use:\n"
+                    "ls -> list files\n"
+                    "delete -> remove junk"
+                )
 
         return None
 
-    # execute commands directly
-    def execute_shell(self, words):
+    # ------------------------------
+    # suggestions
+    # ------------------------------
 
-        command_alias = {
-
-            "show files": "ls",
-            "list files": "ls",
-            "who am i": "whoami",
-            "start matrix": "matrix",
-            "show quote": "quote",
-            "shutdown pyos": "shutdown"
-        }
-
-        joined = " ".join(words)
-
-        for sentence in command_alias:
-
-            if sentence == joined:
-
-                cmd = command_alias[sentence]
-
-                try:
-                    self.last_command = cmd
-                    commands.execute(cmd)
-
-                    return f"Executed: {cmd}"
-
-                except Exception as CommandError:
-                    return f"Execution Error: {CommandError}"
-
-        return None
-
-    # suggest commands
     def suggest_command(self, text):
-
-        text = text.lower()
 
         suggestions = {
 
@@ -282,84 +364,45 @@ class Pulse:
 
         return None
 
-    # contextual replies
-    def contextual_reply(self, text):
+    # ------------------------------
+    # intent engine
+    # ------------------------------
 
-        if text == "how":
-
-            if self.current_topic == "wifi":
-
-                return (
-                    "Try:\n"
-                    "1. reconnect wifi\n"
-                    "2. restart router\n"
-                    "3. check DNS"
-                )
-
-            elif self.current_topic == "disk":
-
-                return (
-                    "Use:\n"
-                    "ls -> list files\n"
-                    "delete -> remove junk files"
-                )
-
-        return None
-
-    # system info
-    def system_info(self, text):
-
-        if "version" in text:
-            return f"PyOS Version 2.0 | Pulse {self.version}"
-
-        elif "user" in text:
-            return f"Current User: {auth.login.current_user}"
-
-        elif "apps" in text:
-            return (
-                "Installed Apps:\n" +
-                "\n".join(self.apps.keys())
-            )
-
-        return None
-
-    # main response engine
     def respond(self, text):
 
         text = text.lower().strip()
+
         words = self.tokenize(text)
 
-        # greeting
-        if self.contains(words, self.greetings):
+        # greetings
+        if any(word in self.greetings for word in words):
+
             return self.handle_greeting()
 
         # bye
-        if self.contains(words, self.byes):
+        if any(word in self.byes for word in words):
+
             return self.handle_bye()
 
         # thanks
         if "thanks" in words:
+
             return f"Always happy to help, {self.username} 😄"
 
-        # commands
-        if "commands" in words or "cmds" in words:
+        # show commands
+        if "commands" in words:
+
             return self.available_commands()
 
-        # explain command
-        if "help" in words or "use" in words or "how" in words:
+        # explain commands
+        if "help" in words or "use" in words:
 
             command_response = self.explain_command(words)
 
             if command_response:
                 return command_response
 
-        # troubleshooting
-        for issue in self.troubleshoot:
-
-            if issue in words:
-                return self.diagnose(issue)
-
-        # open apps
+        # app launching
         if "open" in words or "run" in words:
 
             app_response = self.open_app(words)
@@ -367,49 +410,93 @@ class Pulse:
             if app_response:
                 return app_response
 
-        # execute shell commands
-        shell_response = self.execute_shell(words)
+        # troubleshooting
+        for issue in self.troubleshoot:
 
-        if shell_response:
-            return shell_response
+            if issue in words:
 
-        # command suggestions
-        suggestion = self.suggest_command(text)
+                return self.diagnose(issue)
 
-        if suggestion:
-            return suggestion
+        # auto fixing
+        if "fix" in words:
 
-        # contextual memory
+            if self.last_problem:
+
+                return self.auto_fix(self.last_problem)
+
+        # execute shell commands naturally
+        if text == "show files":
+
+            return self.execute_command("ls")
+
+        elif text == "who am i":
+
+            return self.execute_command("whoami")
+
+        elif text == "start matrix":
+
+            return self.execute_command("matrix")
+
+        elif text == "show quote":
+
+            return self.execute_command("quote")
+
+        # logs
+        if "logs" in words:
+
+            return self.analyze_logs()
+
+        # contextual replies
         context = self.contextual_reply(text)
 
         if context:
             return context
 
-        # system info
-        sysinfo = self.system_info(text)
+        # suggestions
+        suggestion = self.suggest_command(text)
 
-        if sysinfo:
-            return sysinfo
+        if suggestion:
+            return suggestion
+
+        # installed apps
+        if "apps" in words:
+
+            return (
+                "Installed Apps:\n\n" +
+                "\n".join(self.apps)
+            )
+
+        # system info
+        if "version" in words:
+
+            return (
+                f"PyOS Version 2.0\n"
+                f"Pulse Version: {self.version}"
+            )
 
         # fallback
         return (
             "Hmm... I didn't understand that.\n"
             "Try asking about:\n"
             "- commands\n"
+            "- apps\n"
             "- wifi\n"
             "- disk\n"
-            "- apps\n"
-            "- performance"
+            "- performance\n"
+            "- logs"
         )
 
 
+# ------------------------------
 # main loop
+# ------------------------------
+
 def main(username, args=None):
 
     pulse = Pulse(username)
 
     print(f"{pulse.name} {pulse.version} Online...")
-    print("Type 'bye' to exit.\n")
+    print("AI Shell Ready.\n")
 
     while True:
 
@@ -428,11 +515,14 @@ def main(username, args=None):
                 return "Exited"
 
         except KeyboardInterrupt:
+
             print("\nPulse Interrupted.")
             break
 
         except Exception as PulseError:
+
             print(f"Pulse Error: {PulseError}")
+
 
 if __name__ == "__main__":
 

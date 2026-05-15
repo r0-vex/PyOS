@@ -10,24 +10,25 @@ import time
 boot_time=time.time()
 
 APPS_DIR="apps"
+blacklist_apps=["__pycache__","__init__.py"]
 
 config_path=user_log=cmd_py_config=None
 
-sys_log=fs.log("System Log","\\system\\log.txt").logger
-sys_config_path=f"{os.getcwd()}\\system\\config.json"
+sys_log=fs.log("System Log",os.path.join("system","log.txt")).logger
+sys_config_path=os.path.join(os.getcwd(),"system","config.json")
 
 def get_user_log():
     if auth.login.current_user is None:
         return sys_log
     return fs.log(
         f"User: {auth.login.current_user}",
-        f"\\users\\{auth.login.current_user}\\system\\log.txt"
+        os.path.join(auth.login.current_dir,"system","log.txt")
     ).logger
 
 def get_config_path():
     if auth.login.current_user is None:
-        return os.getcwd()+"\\system\\config.json"
-    return f"{os.getcwd()}\\users\\{auth.login.current_user}\\system\\config.json"
+        return os.path.join(os.getcwd(),"system","config.json")
+    return os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json")
 
 class assign:
     def __init__(self):
@@ -56,6 +57,15 @@ def dump_data(args):
     except Exception as CMDError:
         return sys_log.error("ERROR 2: "+str(CMDError))
     return "System config overwritten successfully"
+
+def get_pyos_ver():
+    try:
+        with open(sys_config_path) as ver_conf:
+            return json.loads(ver_conf.read())["version"]
+    except FileNotFoundError:
+        sys_log.error("ERROR 2: Unable to load config file")
+    except Exception as PyOSVersionError:
+        sys_log.error("ERROR 2: Unable to load PyOS version "+str(PyOSVersionError))
 
 def whoami(args):
     return auth.login.current_user
@@ -142,7 +152,7 @@ def sysinfo(args):
     print("System Information:-")
     print("-"*40)
     print(f"{'current user':<20}: {auth.login.current_user}")
-    print(f"{'current directory':<20}: \\users\\{auth.login.current_user}")
+    print(f"{'current directory':<20}: {auth.login.current_dir}")
     print("-"*40)
     for title,info in cmd_py_config.items():
         if title=="color":
@@ -158,7 +168,7 @@ def petname(args):
         dump_data(args)
         user_log.info("Pet name set")
         return "Pet Name Set"
-    cmd_py_config["pet_name"]="PyOS v2.0"
+    cmd_py_config["pet_name"]=f"PyOS {get_pyos_ver()}"
     dump_data(args)
     return "Pet Name Re-Setted"
 
@@ -209,6 +219,9 @@ def apps(args):
         with open(sys_config_path) as sys_config:
             sys_py_config=json.loads(sys_config.read())
         apps_list=sys_py_config["apps"]
+        if not apps_list:
+            
+            apps_list= [app for app in os.listdir(os.path.join(os.getcwd(),"apps")) if app not in blacklist_apps and app.endswith(".py")]
         print("Available Apps:-")
         for count,app_name in enumerate(apps_list):
             print(f"{count+1}. {app_name.replace(".py","").replace("_"," ").capitalize()}")
@@ -278,7 +291,7 @@ def run(args):
         if not hasattr(module,"main"):
             return user_log.error("App has no main()")
         
-        return module.main(auth.login.current_user,os.getcwd()+f"{auth.login.current_dir}\\{APPS_DIR}")
+        return module.main(auth.login.current_user,os.path.join(os.getcwd(),auth.login.current_dir,APPS_DIR))
     except Exception as CMDError:
         return user_log.error("App crashed "+str(CMDError))
 
@@ -312,7 +325,7 @@ cmds={"whoami": {"func":whoami,"permission":"user"},
        #"deldir":deldir, deletes dir
        #"copy":copy, copys and pastes the file or dir in another destination
        #"rename":rename, renames a file or dir
-       #"delete":delete, deletes file
+       #"del":delete, deletes file
        #"cr":cr, creates an empty file in the current dir
        #"readf":readf, opens and displays the contents in a file
        #"man":man, manual for a particular cmd
@@ -326,14 +339,14 @@ cmds={"whoami": {"func":whoami,"permission":"user"},
        "pyver":{"func":py_version,"permission":"user"},
        "cmd":{"func":cmd,"permission":"user"},
        "os":{"func":os_info,"permission":"user"},
-       "apps":{"func":apps,"permission":"users"},
+       "apps":{"func":apps,"permission":"user"},
        }
 
 def execute(cmd):
 
-    if auth.login.current_user is None:
+    """if auth.login.current_user is None:
        print("Not logged in")
-       return
+       return"""
     
     try:
         part=cmd.split()
@@ -343,7 +356,7 @@ def execute(cmd):
         args=part[1:]
         if command in cmds:
             cmd_info=cmds[command]
-            if cmd_info["permission"]=="admin": #and auth.login.current_role!="admin":
+            if cmd_info["permission"]=="admin" and auth.login.current_role!="admin":
                 user_log.critical("Permission Denied!")
                 return
             output=cmd_info["func"](args)

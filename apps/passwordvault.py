@@ -5,8 +5,8 @@ APP_PATH="pv"
 
 def main(username,path):
     try:
-        if not (os.path.isdir(f"{path}\\{APP_PATH}")):
-            os.mkdir(f"{path}\\{APP_PATH}")
+        if not (os.path.isdir(os.path.join(path,APP_PATH))):
+            os.mkdir(os.path.join(path,APP_PATH))
     except Exception as pverror:
         print(f"PV ERROR: {pverror}")
 
@@ -37,9 +37,9 @@ def main(username,path):
             for letter in element:
                 asci=(32+((ord(letter)-32+key)%95))
                 encrypted_data+=chr(asci)
-            with open(path+f"\\{APP_PATH}\\vault.txt","a") as file:
+            with open(os.path.join(path,APP_PATH,"vault.txt"),"a") as file:
                 file.write(encrypted_data+"\n")
-            with open(path+f"\\{APP_PATH}\\backup.bin","ab") as file:
+            with open(os.path.join(path,APP_PATH,"backup.bin"),"ab") as file:
                 file.write((encrypted_data+"\n").encode('utf-8'))
             key+=1
         print("\nEncrypted and saved successfully\n")
@@ -54,7 +54,7 @@ def main(username,path):
     def find():
         site=input("Enter site/app name: ")
         try:
-            with open(path+f"\\{APP_PATH}\\vault.txt","r") as file:
+            with open(os.path.join(path,APP_PATH,"vault.txt"),"r") as file:
                 lines=file.readlines()
                 count=0
                 flag=False
@@ -72,7 +72,7 @@ def main(username,path):
                     print("Sorry no data found with the name!!!")
         except FileNotFoundError:
             try:
-                with open(path+f"\\{APP_PATH}\\backup.bin","rb") as file:
+                with open(os.path.join(path,APP_PATH,"backup.bin"),"rb") as file:
                     text=file.read().decode('utf-8')
                     lines=text.split("\n")
                     count=0
@@ -98,7 +98,7 @@ def main(username,path):
 
     def view():
         try:
-            with open(path+f"\\{APP_PATH}\\vault.txt") as file:
+            with open(os.path.join(path,APP_PATH,"vault.txt")) as file:
                 lines=[line.strip() for line in file.readlines() if line.strip()]
                 count=0
                 while count<len(lines):
@@ -108,7 +108,7 @@ def main(username,path):
                 print()
         except FileNotFoundError:
             try:
-                with open(path+f"\\{APP_PATH}\\backup.bin",'rb') as file:
+                with open(os.path.join(path,APP_PATH,"backup.bin"),'rb') as file:
                     text=file.read().decode('utf-8')
                     lines=text.split("\n")
                     count=0
@@ -125,8 +125,8 @@ def main(username,path):
 
     def clearall():
         try:
-            open(path+f"\\{APP_PATH}\\vault.txt","w").close()
-            open(path+f"\\{APP_PATH}\\backup.bin","wb").close()
+            open(os.path.join(path,APP_PATH,"vault.txt"),"w").close()
+            open(os.path.join(path,APP_PATH,"backup.bin"),"wb").close()
         except FileNotFoundError:
             print("No data exist!!")
         except Exception as PVError:

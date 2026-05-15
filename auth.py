@@ -27,7 +27,7 @@ class UserNotFound(Exception):
 class IncorrectPassword(Exception):
      pass
 
-sys_log=fs.log("System Log","\\system\\log.txt").logger
+sys_log=fs.log("System Log",os.path.join("system","log.txt")).logger
 global auth_py_config
 #loading auth config
 try:
@@ -103,7 +103,7 @@ def validate_username(mode="user"):
         except TooLong:
             sys_log.warning("User Name too Long")
         except SpecialChar:
-            sys_log.warning("Invalid Characters: "+invalid_char)
+            sys_log.warning("Invalid Characters: "+"".join(invalid_char))
         except ReservedWord:
             sys_log.warning("Reserved names can't be username")
         except KeyboardInterrupt:
@@ -116,7 +116,7 @@ def validate_password(mode="user"):
     while True:
         invalid_char=set()
         digit_count=letter_upper=letter_lower=sp_char=0
-        print("Enter PyOS Password")
+        print("Enter PyOS Password:")
         try:
             user_password=input(f"PyOS:/create/{mode}_password> ")
             if user_password=="":
@@ -261,7 +261,7 @@ class login():
                     if security.verify_password(a_password,password,key):
                             login.current_user=user
                             login.current_role="admin"
-                            login.current_dir="\\users\\"+user
+                            login.current_dir=os.path.join("users",user)
                             return True
                     login_attempt-=1
                     sys_log.error("ERROR 1j: Incorrect Password")
@@ -276,7 +276,7 @@ class login():
                     if security.verify_password(u_password,password,key):
                         login.current_user=user
                         login.current_role="user"
-                        login.current_dir="\\users\\"+user
+                        login.current_dir=os.path.join("users",user)
                         return True
                     login_attempt-=1
                     sys_log.error("ERROR 1j: Incorrect Password")
@@ -284,6 +284,7 @@ class login():
                 sys_log.error("ERROR 1h: User Not Found")
             return False
         except KeyboardInterrupt:
+            sys_log.error("ERROR 1k: Forced Shutdown")
             return False
         except Exception as LoginError:
                 sys_log.error("ERROR 1i: "+str(LoginError))

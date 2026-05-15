@@ -5,8 +5,8 @@ APP_PATH="notes"
 
 def main(username,path):
     try:
-        if not (os.path.isdir(f"{path}\\{APP_PATH}")):
-            os.mkdir(f"{path}\\{APP_PATH}")
+        if not (os.path.isdir(os.path.join(path,APP_PATH))):
+            os.mkdir(os.path.join(path,APP_PATH))
     except Exception as nerror:
         print(f"NOTES ERROR: {nerror}")
 
@@ -21,7 +21,7 @@ def main(username,path):
     def add_notes():
         note=input(f"PyOS:/home/{username}/apps/notes/add-note> ")
         try:
-            f1=open(path+f"\\{APP_PATH}\\notes.txt","a")
+            f1=open(os.path.join(path,APP_PATH,"notes.txt"),"a")
             f1.write(note+"\n")
             f1.close()
         except Exception as ADDNOTEError:
@@ -29,7 +29,7 @@ def main(username,path):
         print("Note Added Successfully")
     def view_notes():
         try:
-            f1=open(path+f"\\{APP_PATH}\\notes.txt","r")
+            f1=open(os.path.join(path,APP_PATH,"notes.txt"),"r")
             notes=f1.readlines()
             f1.close()
             if not notes:
@@ -46,12 +46,12 @@ def main(username,path):
     def delete_notes():
         try:
             n=int(input(f"PyOS:/home/{username}/apps/notes/line-no> "))
-            f1=open(path+f"\\{APP_PATH}\\notes.txt","r")
+            f1=open(os.path.join(path,APP_PATH,"notes.txt"),"r")
             notes=f1.readlines()
             f1.close()
             if 1<=n<=len(notes):
                 del_txt=notes[n-1].strip()
-                with open(path+f"\\{APP_PATH}\\notes.txt","w") as file:
+                with open(os.path.join(path,APP_PATH,"notes.txt"),"w") as file:
                     for note in notes:
                         if note.strip() != del_txt:
                             file.write(note)
