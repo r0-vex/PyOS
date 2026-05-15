@@ -253,7 +253,7 @@ def color(args):
         return
 
 def cmd(args):
-    return "PyOS [version 2.0.00]\n(info) Python based kernel os.\n"
+    return "PyOS [version 2.0.00]\n(info) Python based kernel os simulator.\n"
 
 def os_info(args):
     if not args:
