@@ -238,6 +238,9 @@ PyOS/
 │   ├── config.json
 │   ├── log.txt
 │   └── backup/
+│        ├── os/
+│        ├── configs/
+│        └── users/
 │
 ├── users/
 │   └── username/
@@ -248,6 +251,7 @@ PyOS/
 └── apps/
     ├── pulse.py
     ├── guess.py
+    ├── passwordvault.py
     ├── notes.py
     ├── calculator.py
     └── ...
