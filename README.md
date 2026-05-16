@@ -1,303 +1,230 @@
-🚀 PyOS v2.0
+# 🚀 PyOS v2.0
 
 > A Python-based terminal operating system simulator built entirely from scratch.
-
-
 
 PyOS is a terminal-driven operating system simulator developed using Python. It is designed to simulate core operating system concepts such as authentication, filesystem handling, shell commands, app execution, logging, themes, permissions, and AI-assisted terminal interaction.
 
 PyOS is both:
 
-a learning project for operating system and systems programming concepts
-
-a modular shell ecosystem inspired by real-world terminal environments
-
-
+* a learning project for operating system and systems programming concepts
+* a modular shell ecosystem inspired by real-world terminal environments
 
 ---
 
-📌 Features
+# 📌 Features
 
-🔐 Authentication System
+## 🔐 Authentication System
 
-First-boot admin setup
-
-User account creation
-
-Login system
-
-Password validation
-
-Password hashing
-
-Role-based permissions
-
-Account lock system after failed attempts
-
-Separate admin and user environments
-
-
+* First-boot admin setup
+* User account creation
+* Login system
+* Password validation
+* Password hashing
+* Role-based permissions
+* Account lock system after failed attempts
+* Separate admin and user environments
 
 ---
 
-🖥️ Interactive Shell
+## 🖥️ Interactive Shell
 
 PyOS provides a terminal-style shell environment.
 
 Example:
 
+```bash
 PyOS:/home/username>
+```
 
 Supports:
 
-command parsing
-
-command permissions
-
-arguments
-
-app launching
-
-filesystem operations
-
-
+* command parsing
+* command permissions
+* arguments
+* app launching
+* filesystem operations
 
 ---
 
-📂 Filesystem Engine
+# 📂 Filesystem Engine
 
 PyOS contains a virtual filesystem layer.
 
-Supported Commands
+## Supported Commands
 
-Command	Description
-
-ls	List files and directories
-sd	Change directory
-crdir	Create directory
-deldir	Delete directory
-cr	Create file
-del	Delete file
-copy	Copy files
-rename	Rename files/directories
-readf	Read file contents
-
-
+| Command  | Description                |
+| -------- | -------------------------- |
+| `ls`     | List files and directories |
+| `sd`     | Change directory           |
+| `crdir`  | Create directory           |
+| `deldir` | Delete directory           |
+| `cr`     | Create file                |
+| `del`    | Delete file                |
+| `copy`   | Copy files                 |
+| `rename` | Rename files/directories   |
+| `readf`  | Read file contents         |
 
 ---
 
-🛡️ Security Features
+# 🛡️ Security Features
 
-Username validation
-
-Password validation
-
-Restricted usernames
-
-File extension whitelist
-
-Login attempt limits
-
-User isolation
-
-Protected system directories
-
-Role-based access system
-
-
+* Username validation
+* Password validation
+* Restricted usernames
+* File extension whitelist
+* Login attempt limits
+* User isolation
+* Protected system directories
+* Role-based access system
 
 ---
 
-📜 Logging System
+# 📜 Logging System
 
 PyOS includes dynamic logging support.
 
-Available Logs
+### Available Logs
 
-System logs
-
-User logs
-
-App logs
-
-Backup logs
-
+* System logs
+* User logs
+* App logs
+* Backup logs
 
 Example log:
 
+```txt
 2026-01-31 18:01:43 : INFO : User Logged In
-
+```
 
 ---
 
-🎨 Theme Engine
+# 🎨 Theme Engine
 
 PyOS supports terminal themes using foreground/background color combinations.
 
-Built-in Themes
+## Built-in Themes
 
-matrix
-
-ice
-
-bloodmoon
-
-ocean
-
-royal
-
-terminal
-
-ghost
-
+* matrix
+* ice
+* bloodmoon
+* ocean
+* royal
+* terminal
+* ghost
 
 Example:
 
+```bash
 color matrix
-
+```
 
 ---
 
-🔄 Power Management
+# 🔄 Power Management
 
 Supported power commands:
 
-Command	Description
-
-shutdown	Exit PyOS
-logout	Logout current user
-restart	Restart PyOS
-
+| Command    | Description         |
+| ---------- | ------------------- |
+| `shutdown` | Exit PyOS           |
+| `logout`   | Logout current user |
+| `restart`  | Restart PyOS        |
 
 PyOS restart system uses:
 
-fresh process launching
-
-batch bootloader
-
-clean shell rebooting
-
-
+* fresh process launching
+* batch bootloader
+* clean shell rebooting
 
 ---
 
-🤖 Pulse AI Assistant
+# 🤖 Pulse AI Assistant
 
 Pulse is the built-in AI terminal assistant.
 
 Capabilities:
 
-command help
-
-troubleshooting
-
-app launching
-
-shell assistance
-
-system guidance
-
-PyOS-specific support
-
+* command help
+* troubleshooting
+* app launching
+* shell assistance
+* system guidance
+* PyOS-specific support
 
 Example:
 
+```txt
 Pulse> Available Commands:
-
+```
 
 ---
 
-🎮 Built-in Apps
+# 🎮 Built-in Apps
 
 Current apps include:
 
-Guess Game
-
-Notes
-
-Calculator
-
-Password Vault
-
-Currency Converter
-
-Pulse AI Assistant
-
+* Guess Game
+* Notes
+* Calculator
+* Password Vault
+* Currency Converter
+* Pulse AI Assistant
 
 Apps can be launched using:
 
+```bash
 run appname
+```
 
 Example:
 
+```bash
 run guess
-
+```
 
 ---
 
-🎲 Guess Game
+# 🎲 Guess Game
 
 Features:
 
-Multiple difficulty levels
-
-Hint system
-
-Dynamic scoring
-
-High-score support
-
-Randomized gameplay
-
+* Multiple difficulty levels
+* Hint system
+* Dynamic scoring
+* High-score support
+* Randomized gameplay
 
 Difficulty Modes:
 
-Easy
-
-Hard
-
-Very Hard
-
-
+* Easy
+* Hard
+* Very Hard
 
 ---
 
-🧠 Concepts Used
+# 🧠 Concepts Used
 
 PyOS demonstrates practical implementation of:
 
-OOP
-
-File handling
-
-JSON configuration management
-
-Logging systems
-
-Authentication systems
-
-Password hashing
-
-Runtime app execution
-
-Shell architecture
-
-Virtual filesystem concepts
-
-Error handling
-
-Terminal UI design
-
-Process management
-
-Restart lifecycle management
-
-
+* OOP
+* File handling
+* JSON configuration management
+* Logging systems
+* Authentication systems
+* Password hashing
+* Runtime app execution
+* Shell architecture
+* Virtual filesystem concepts
+* Error handling
+* Terminal UI design
+* Process management
+* Restart lifecycle management
 
 ---
 
-📁 Project Structure
+# 📁 Project Structure
 
+```txt
 PyOS/
 │
 ├── main.py
@@ -324,176 +251,140 @@ PyOS/
     ├── notes.py
     ├── calculator.py
     └── ...
-
-
----
-
-⚙️ Installation
-
-Requirements
-
-Python 3.10+
-
-Windows CMD Terminal
-
-
+```
 
 ---
 
-Clone Repository
+# ⚙️ Installation
 
+## Requirements
+
+* Python 3.10+
+* Windows CMD Terminal
+
+---
+
+## Clone Repository
+
+```bash
 git clone <repository-url>
-
+```
 
 ---
 
-Start PyOS
+## Start PyOS
 
 Run:
 
+```bash
 boot.bat
+```
 
 Do NOT run:
 
+```bash
 python main.py
+```
 
 because PyOS uses a dedicated bootloader system.
 
-
 ---
 
-🧩 Configuration
+# 🧩 Configuration
 
-System Configuration
+## System Configuration
 
 Stored in:
 
+```txt
 /system/config.json
-
+```
 
 ---
 
-User Configuration
+## User Configuration
 
 Stored in:
 
+```txt
 /users/<username>/system/config.json
-
+```
 
 ---
 
-🔧 Future Plans
+# 🔧 Future Plans
 
 Planned features include:
 
-Safe mode
-
-Package manager
-
-Background services
-
-Improved Pulse AI
-
-Networking utilities
-
-Process manager
-
-Task scheduler
-
-Plugin system
-
-Custom themes
-
-Script engine
-
-File encryption
-
-Linux support
-
-
+* Safe mode
+* Package manager
+* Background services
+* Improved Pulse AI
+* Networking utilities
+* Process manager
+* Task scheduler
+* Plugin system
+* Custom themes
+* Script engine
+* File encryption
+* Linux support
 
 ---
 
-⚠️ Current Limitations
+# ⚠️ Current Limitations
 
-Windows-focused architecture
-
-CMD terminal dependent
-
-No true multitasking yet
-
-No real kernel-level isolation
-
-ANSI support limited
-
-
+* Windows-focused architecture
+* CMD terminal dependent
+* No true multitasking yet
+* No real kernel-level isolation
+* ANSI support limited
 
 ---
 
-💡 Educational Purpose
+# 💡 Educational Purpose
 
 PyOS is NOT a real operating system kernel.
 
 It is:
 
-an educational operating system simulator
-
-a systems programming practice project
-
-a shell architecture experiment
-
-a terminal ecosystem project
-
-
+* an educational operating system simulator
+* a systems programming practice project
+* a shell architecture experiment
+* a terminal ecosystem project
 
 ---
 
-👨‍💻 Developer
+# 👨‍💻 Developer
 
 Developed by Rohith.
 
 Built for:
 
-learning
-
-experimentation
-
-systems design practice
-
-terminal ecosystem development
-
-
+* learning
+* experimentation
+* systems design practice
+* terminal ecosystem development
 
 ---
 
-📜 License
+# 📜 License
 
 This project is open for learning and experimentation.
 
-
 ---
 
-🔥 Final Note
+# 🔥 Final Note
 
 PyOS started as a small Python terminal project and evolved into a modular shell ecosystem featuring:
 
-authentication
-
-filesystem architecture
-
-runtime apps
-
-AI assistance
-
-theme engine
-
-restart lifecycle
-
-logging infrastructure
-
-command parser
-
-virtual user environments
-
+* authentication
+* filesystem architecture
+* runtime apps
+* AI assistance
+* theme engine
+* restart lifecycle
+* logging infrastructure
+* command parser
+* virtual user environments
 
 > “Talk is cheap. Show me the code.”
