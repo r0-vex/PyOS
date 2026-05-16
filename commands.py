@@ -6,6 +6,7 @@ import importlib
 from datetime import datetime
 import calendar
 import time
+import sys
 
 boot_time=time.time()
 
@@ -155,7 +156,7 @@ def sysinfo(args):
     print(f"{'current directory':<20}: {auth.login.current_dir}")
     print("-"*40)
     for title,info in cmd_py_config.items():
-        if title=="color":
+        if title=="theme":
                break
         text=title.replace("_"," ")
         print(f"{text:<20}: {info}")
@@ -192,7 +193,7 @@ def matrix(args):
             time.sleep(0.1)
             print(line,flush=True)
     except KeyboardInterrupt:
-        os.system(cmd_py_config["color"])
+        os.system(cmd_py_config["theme"])
         return " "
 
 def users(args):
@@ -211,8 +212,9 @@ def add_user(args):
     return "Unable to create user!"
 
 def logout(args):
-    auth.login.current_dir=auth.login.current_role=auth.login.current_user=None
-    return " "
+    auth.login.current_user=auth.login.current_role=auth.login.current_dir=None
+    os.system("color f")
+    return "\nLogged Out!"
 
 def apps(args):
     try:
@@ -233,27 +235,42 @@ def apps(args):
         user_log.error("Error CMD: "+str(CMDError))
         return
 
-def color(args):
-    colors_list={"blue":"color 1","green":"color 2","aqua":"color 3","red":"color 4","purple":"color 5",
-                 "yellow":"color 6","white":"color 7","gray":"color 8","light blue":"color 9","light green":"color a",
-                 "light aqua":"color b","light red":"color c","light purple":"color d","light yellow":"color e","default":"color f"}
-    print("Choose your color theme:-")
-    for count,color_name in enumerate(colors_list.keys()):
-        print(f"{count+1}. {color_name.title()}",end="  ")
-        if count+1 == 9:
-            print()
-    choice=input(f"\nPyOS:/home/{auth.login.current_user}/color_name> ").lower()
-    if choice in colors_list:
-        cmd_py_config["color"]=colors_list[choice]
-        dump_data(None)
-        os.system(colors_list[choice])
-        return " "
-    else:
-        print("No color has been choosen!")
-        return
+def theme(args):
+    themes = {
+        "matrix": {"code": "0a","desc": "Classic hacker green"},
+        "bloodmoon": {"code": "04","desc": "Dark red danger"},
+        "ocean": {"code": "1b","desc": "Cool aqua shell"},
+        "royal": {"code": "5f","desc": "Purple elite"},
+        "ghost":{"code":"08","desc":"Dark Mode"},
+        "sunset":{"code":"60","desc":"Sunset black theme"},
+        "ice":{"code":"1f","desc":"Cold Blue White"},
+        "lava":{"code":"40","desc":"Hot Lava Black"},
+        "neon":{"code":"0d","desc":"Black Magenta Theme"},
+        "default": {"code": "f","desc": "Classic PyOS"}
+    }
+    if not args:
+        print("\nAvailable Themes:-\n")
+        for name, desc in themes.items():
+            print(f"{name.title():<12} : {desc['desc']}")
+        theme=input(f"\nEnter Theme Name: ").lower()
+    if args:
+        theme = args[0].lower()
+    if theme not in themes:
+        return "Theme not found"
+    selected = themes[theme]
+    os.system(f"color {selected['code']}")
+    print(f"\nPreviewing Theme: {theme.upper()}")
+    confirm = input("Apply Theme? (y/n): ")
+    if confirm.lower() != "y":
+        os.system(cmd_py_config["theme"])
+        return "Theme cancelled"
+    # save theme
+    cmd_py_config["theme"] = f"color {selected['code']}"
+    dump_data(None)
+    return f"{theme.title()} theme applied"
 
 def cmd(args):
-    return "PyOS [version 2.0.00]\n(info) Python based kernel os simulator.\n"
+    return "PyOS [version 2.3.11]\n(info) Python based kernel os simulator.\n"
 
 def os_info(args):
     if not args:
@@ -295,6 +312,21 @@ def run(args):
     except Exception as CMDError:
         return user_log.error("App crashed "+str(CMDError))
 
+def restart(args):
+    print("Saving session...")
+    time.sleep(1)
+    print("Stopping services...")
+    time.sleep(1)
+    print("Restarting kernel...")
+    time.sleep(1)
+    print("Restarting PyOS. ",end="")
+    logout(None)
+    for _ in range(3):
+        time.sleep(0.7)
+        print(". ",end="",flush=True)
+    os.system("start boot.bat")
+    sys.exit(0)
+
 cmds={"whoami": {"func":whoami,"permission":"user"},
        "clear": {"func":clear,"permission":"user"},
        "date": {"func":_date_,"permission":"user"},
@@ -331,9 +363,10 @@ cmds={"whoami": {"func":whoami,"permission":"user"},
        #"man":man, manual for a particular cmd
        #"search":search, searchs a word in a file
        #"count":count , counts the number of words/letters/lines in a txt file
-       "color":{"func":color,"permission":"user"},
+       "theme":{"func":theme,"permission":"user"},
        #"lock":lock, locks the os for a certain period of time
-       "logout":{"permission":"user"},
+       "logout":{"func":logout,"permission":"user"},
+       "restart":{"func":restart,"permission":"user"},
        #reset os, resets the entire os only by admin
        #reset user, resets all the user profile without deleting user
        "pyver":{"func":py_version,"permission":"user"},

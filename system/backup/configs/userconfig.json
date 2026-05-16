@@ -9,7 +9,7 @@
     "pet_name": "PyOS v2.0",
     "description": "A simple Python based OS with JSON configuration.",
     "last_logged_in":null,
-    "color": "color f",
+    "theme": "color f",
     "locked": false,
     "lock_until": 0
 }

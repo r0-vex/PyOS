@@ -24,6 +24,7 @@ except:
      
 os.system(f"title PyOS {version_no}")
 time.sleep(1)
+os.system("cls")
 
 print(r"""  _____        ____   _____        ___    ___  
  |  __ \      / __ \ / ____|      |__ \  / _ \ 
@@ -162,7 +163,7 @@ if __name__=="__main__":
                 user_log=fs.log(f"{curr_user} Log",os.path.join("users",curr_user,"system","log.txt")).logger
                 with open(os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json")) as load_user_config:
                     user_config=json.loads(load_user_config.read())
-                    os.system(user_config["color"])
+                    os.system(user_config["theme"])
                     user_config["python_version"]=version
                 with open(os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json"),"w") as py_user_config:
                     py_user_config.write(json.dumps(user_config))
@@ -196,6 +197,7 @@ if __name__=="__main__":
                             for _ in range(5):
                                 time.sleep(0.7)
                                 print(". ",end="",flush=True)
+                            sys.exit(0)
                             break
                 else:
                     print("Logging in. ",end="")
@@ -206,7 +208,7 @@ if __name__=="__main__":
                     sys_log.info(auth.login.current_user+" logged in...")
                     print("\nLogin Successfull.")
                     os.system("cls")
-                    print("PyOS [version 2.0.00]\n(info) Python based kernel os simulator.") 
+                    print("PyOS [version 2.3.11]\n(info) Python based kernel os simulator.") 
                     commands.assign()
             #shell loop 
                     while True:
@@ -220,13 +222,14 @@ if __name__=="__main__":
                                 print(". ",end="",flush=True)
                             break
                         elif cmd.lower()=="logout":
-                            commands.execute("logout")
                             print("Logging out. ",end="")
                             for _ in range(3):
                                 time.sleep(0.7)
                                 print(". ",end="",flush=True)
+                            commands.execute(cmd.lower())
                             user_log.info("Logged Out!")
                             sys_log.info(curr_user+" Logged Out...")
+                            os.system("cls")
                             break
                         commands.execute(cmd.lower())
                     if cmd.lower()=="shutdown":

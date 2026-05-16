@@ -8,5 +8,5 @@
     "languages_used": "Python and JSON",
     "pet_name": "PyOS v2.0",
     "description": "A simple Python based OS with JSON configuration.",
-    "color": "color f"
+    "theme": "color f"
 }
