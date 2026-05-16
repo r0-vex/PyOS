@@ -356,7 +356,7 @@ It is:
 
 # 👨‍💻 Developer
 
-Developed by Rohith.
+Developed by **Rohith**.
 
 Built for:
 
