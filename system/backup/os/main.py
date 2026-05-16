@@ -187,7 +187,7 @@ if __name__=="__main__":
                                 py_user_config.write(json.dumps(user_config))
                             sys_log.info(curr_user+" lock removed!")
                             user_log.info("OS Lock Removed!")
-                            auth.login.current_dir=auth.login.current_user=auth.login.current_role=None
+                            commands.logout(None)
                             print("Lock Removed!")
                             continue
                         else:
@@ -236,13 +236,13 @@ if __name__=="__main__":
                         break
             else:
                 if auth.login.current_user and auth.login.current_user != boot_sys_config["admin"]:
-                    user_log=fs.log(f"{auth.login.current_user} Log",os.path.join(auth.login.current_dir,"system","log.txt")).logger
-                    with open(os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json")) as load_user_config:
+                    user_log=fs.log(f"{auth.login.current_user} Log",os.path.join("users",auth.login.current_user,"system","log.txt")).logger
+                    with open(os.path.join(os.getcwd(),"users",auth.login.current_user,"system","config.json")) as load_user_config:
                         user_config=json.loads(load_user_config.read())
                     user_config["lock_until"]=time.time()+300
                     user_config["locked"]=True
                     user_config["version"]=version
-                    with open(os.path.join(os.getcwd(),auth.login.current_dir,"system","config.json"),"w") as py_user_config:
+                    with open(os.path.join(os.getcwd(),"users",auth.login.current_user,"system","config.json"),"w") as py_user_config:
                         py_user_config.write(json.dumps(user_config))
                     user_log.critical("OS set to Locked!")
                     sys_log.critical(auth.login.current_user+" OS set to Locked!")
@@ -253,7 +253,7 @@ if __name__=="__main__":
                 break
         except FileNotFoundError:
             sys_log.critical(f"{auth.login.current_user} Config Not Found")
-            user_log=fs.log(f"{auth.login.current_user} Log",os.path.join(auth.login.current_dir,"system","log.txt")).logger
+            user_log=fs.log(f"{auth.login.current_user} Log",os.path.join("users",auth.login.current_user,"system","log.txt")).logger
             user_log.critical("User Config Not Found")
         except KeyboardInterrupt:
             print("Shutting down. ",end="")
