@@ -1,0 +1,16 @@
+{
+    "OS_name": "PyOS",
+    "version": "v3.0",
+    "version_name":"3.2.0",
+    "python_version": "",
+    "created_on":"",
+    "type": "user",
+    "kernel": "IDLE / cmd",
+    "languages_used": "Python and JSON",
+    "pet_name": "PyOS v3.0",
+    "description": "A simple Python based OS with JSON configuration.",
+    "last_logged_in":null,
+    "theme": "color f",
+    "locked": false,
+    "lock_until": 0
+}

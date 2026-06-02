@@ -1,0 +1,20 @@
+{
+  "os_name": "PyOS",
+  "version": "v3.0",
+  "version_name":"3.2.0",
+  "python_version": "",
+  "kernel": "IDLE / cmd",
+  "languages_used": "Python and JSON",
+  "booted_on": "",
+  "allowed_users": 5,
+  "created_users": 0,
+  "max_log": 500,
+  "boot_flag": true,
+  "locked": false,
+  "admin": "",
+  "admin_password": {},
+  "users": [],
+  "users_hash": [],
+  "apps": [],
+  "lock_until": 0
+}
