@@ -1,4 +1,8 @@
-# 🚀 PyOS v3.2
+![Version](https://img.shields.io/badge/version-v3.2.1-blue)
+![Python](https://img.shields.io/badge/python-3.10+-green)
+![Status](https://img.shields.io/badge/status-active-success)
+
+# 🚀 PyOS v3.2.1
 
 > A Python-based Operating System Simulator built entirely from scratch.
 
@@ -24,33 +28,43 @@ Unlike a real operating system kernel, PyOS runs entirely in user space and focu
 * Account lockout system after failed login attempts
 * Administrative account recovery
 * Separate user environments
+* Reserved username protection
 
 ---
 
 ## 📂 Virtual Filesystem
 
-PyOS provides a secure virtual filesystem for each user.
+PyOS provides a secure virtual filesystem for each user isolated from the host operating system.
 
 Features:
 
-* File creation
-* File deletion
-* Directory creation
-* Directory deletion
-* File reading
-* File writing
-* File copying
-* File moving
-* File renaming
-* Built-in text editor
-* Virtual path support
+* Create files
+* Delete files
+* Read files
+* Write files
+* Edit files
+* Copy files
+* Move files
+* Rename files
+* Create directories
+* Delete directories
+* Navigate directories
+* Display working directory
+* List directory contents
+
+### Filesystem Security
+
+* Path traversal protection
+* User directory isolation
 * Protected system directories
+* Protected system files
+* Access control enforcement
 
 ---
 
 ## 🛡️ Security Architecture
 
-PyOS uses a layered security model.
+PyOS uses a layered and a role-based security model.
 
 ### Roles
 
@@ -59,6 +73,32 @@ PyOS
 └── Admin
     └── User
 ```
+
+#### User
+
+Can:
+
+* Access own files
+* Run applications
+* Modify own data
+
+Cannot:
+
+* Modify system files
+* Modify protected directories
+* Access other users' data
+
+#### Administrator
+
+Can:
+
+* Manage users
+* View system logs
+* Access user logs
+* Unlock accounts
+* Configure system settings
+
+---
 
 ### Security Features
 
@@ -73,34 +113,71 @@ PyOS
 
 ---
 
-## 📜 Logging System
+## 📜 Logging Subsystem
 
-PyOS maintains detailed logs for troubleshooting and auditing.
+PyOS v3.2.1 introduces a complete logging framework.
 
-### Available Logs
-
-#### System Logs
-
-Stores:
-
-* Boot events
-* Shutdown events
-* Authentication events
-* Security events
-* Runtime errors
+### Log Types
 
 #### User Logs
 
-Stores:
+Stored separately for each user.
 
-* Login activity
-* Logout activity
-* File operations
-* Administrative actions
+Tracks:
+
+* Logins
+* Logouts
+* Command execution
+* User errors
+* Warnings
+
+#### System Logs
+
+Tracks:
+
+* Boot events
+* Shutdown events
+* User creation
+* Security events
+* Critical system operations
 
 #### Backup Logs
 
-Reserved for future backup and recovery features.
+Tracks:
+
+* Backup operations
+* Restore operations
+* Recovery actions
+
+*Reserved for future backup and recovery features.*
+
+---
+
+### Logging Features
+
+* User log viewing
+* System log viewing
+* Log statistics
+* Log trimming
+* Automatic log trimming
+* Configurable log limits
+* Administrative log inspection
+* User log management
+
+---
+
+## 💬 Quote Engine
+
+PyOS includes a programming quote engine containing 501 programming and computer science quotes.
+
+Features:
+
+* Random quote generation
+* Quote cache system
+* No duplicate quotes until all quotes are exhausted
+* Automatic cache reset
+* Fallback quote protection
+* Offline operation
 
 ---
 
@@ -108,15 +185,20 @@ Reserved for future backup and recovery features.
 
 PyOS supports multiple terminal themes.
 
-Built-in themes:
+Built-in terminal themes:
 
-* matrix
-* ice
-* bloodmoon
-* ocean
-* royal
-* terminal
-* ghost
+| Theme     | Description          |
+| --------- | -------------------- |
+| matrix    | Classic hacker green |
+| bloodmoon | Dark red danger      |
+| ocean     | Aqua blue            |
+| royal     | Purple elite         |
+| ghost     | Dark mode            |
+| sunset    | Yellow-black sunset  |
+| ice       | Blue-white           |
+| lava      | Red-black            |
+| neon      | Magenta-black        |
+| default   | Classic terminal     |
 
 Example:
 
@@ -125,6 +207,33 @@ theme matrix
 ```
 
 ---
+
+# 📦 Built-in Applications
+
+PyOS ships with several bundled applications.
+
+### Calculator
+
+Basic arithmetic calculator.
+
+### Notes
+
+Simple note-taking application.
+
+### Guess
+
+Number guessing game.
+
+### Password Vault
+
+Secure password storage utility.
+
+### Pulse
+
+System utility application.
+
+---
+
 
 ## 🖥️ Shell Environment
 
@@ -181,6 +290,74 @@ Display system information and version details.
 ![Screenfetch](screenshots/screenfetch.png)
 
 # 📖 Command Reference
+
+## Utility Commands
+
+| Command     | Description                      |
+| ----------- | -------------------------------- |
+| help        | Display command help             |
+| clear       | Clear terminal                   |
+| whoami      | Show current user                |
+| date        | Display current date             |
+| time        | Display current time             |
+| day         | Display current day              |
+| uptime      | Display system uptime            |
+| pyver       | Display Python version           |
+| os          | Display OS information           |
+| sysinfo     | Display system information       |
+| screenfetch | Display PyOS banner              |
+| greet       | Display greeting                 |
+| quote       | Display random programming quote |
+| mood        | Random mood response             |
+| echo        | Echo text                        |
+| reverse     | Reverse text                     |
+| cal         | Display calendar                 |
+| roll        | Roll a dice                      |
+| coin        | Flip a coin                      |
+| petname     | Generate pet names               |
+| whoareu     | About PyOS                       |
+
+---
+
+## User Management Commands
+
+| Command | Description         |
+| ------- | ------------------- |
+| users   | List users (Admin)  |
+| adduser | Create user (Admin) |
+| logout  | Logout current user |
+| restart | Restart PyOS        |
+
+---
+
+## Application Commands
+
+| Command | Description                 |
+| ------- | --------------------------- |
+| apps    | List installed applications |
+| run     | Launch application          |
+
+---
+
+## Filesystem Commands
+
+| Command | Description             |
+| ------- | ----------------------- |
+| pwd     | Show current directory  |
+| ls      | List directory contents |
+| sd      | Change directory        |
+| cr      | Create file             |
+| del     | Delete file             |
+| readf   | Read file               |
+| writef  | Write to file           |
+| edit    | Open Nano-style editor  |
+| copy    | Copy file               |
+| move    | Move file               |
+| rename  | Rename file             |
+| crdir   | Create directory        |
+| deldir  | Delete directory        |
+
+---
 
 ## Filesystem Commands
 
@@ -566,39 +743,104 @@ run calculator
 
 ---
 
+# 📜 Logging Commands
+
+## User Commands
+
+### Information
+
+```bash
+logs info
+logs config
+logs stats
+```
+
+### Viewing Logs
+
+```bash
+logs view
+logs tail <n>
+```
+
+### Management
+
+```bash
+logs trim
+logs clear
+```
+
+### Configuration
+
+```bash
+logs set max <value>
+logs set trim <on/off>
+```
+
+---
+
+## Administrator Commands
+
+### System Logs
+
+```bash
+logs system view
+logs system tail <n>
+logs system stats
+logs system info
+logs system trim
+logs system clear
+```
+
+### System Configuration
+
+```bash
+logs system set max <value>
+logs system set trim <on/off>
+```
+
+### User Logs
+
+```bash
+logs user <username> view
+logs user <username> tail <n>
+logs user <username> stats
+logs user <username> clear
+```
+
+---
+
 # 📂 Filesystem Layout
 
 ```text
 PyOS/
 │
-├── main.py
+├── apps/
+│   ├── calculator.py
+│   ├── guess.py
+│   ├── notes.py
+│   ├── passwordvault.py
+│   └── pulse.py
+│
+├── system/
+│   ├── backup/
+│   ├── data/
+│   │   ├── quotes.json
+│   │   └── cache.txt
+│   ├── config.json
+│   └── log.txt
+│
+├── users/
+│    ├── apps/
+│    ├── home/
+│    └── system/
+│
 ├── auth.py
 ├── commands.py
 ├── fs.py
-├── security.py
 ├── logger.py
-├── boot.bat
-│
-├── system/
-│   ├── config.json
-│   ├── log.txt
-│   └── backup/
-│       ├── users/
-│       └── logs/
-│
-├── users/
-│   └── <username>/
-│       ├── home/
-│       ├── apps/
-│       └── system/
-│           ├── config.json
-│           └── log.txt
-│
-└── apps/
-    ├── calculator.py
-    ├── notes.py
-    ├── guess.py
-    └── ...
+├── main.py
+├── security.py
+└── boot.bat
 ```
 
 ---
@@ -629,6 +871,20 @@ boot.bat
 
 ---
 
+# 📈 Performance
+
+### Boot Time Improvements
+
+| Version | Average Boot Time |
+| ------- | ----------------- |
+| v3.2.0  | ~23 seconds       |
+| v3.2.1  | ~17 seconds       |
+
+Approximately 26% faster boot performance.
+
+---
+
+
 # ⚙️ Installation
 
 ## Requirements
@@ -641,7 +897,7 @@ boot.bat
 ## Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/r0-vex/PyOS
 ```
 
 ---
@@ -666,47 +922,45 @@ PyOS uses a dedicated bootloader process.
 
 # 📜 Release Notes
 
-## PyOS v3.2
+## PyOS v3.2.1
 
 ### Added
 
-* Complete virtual filesystem implementation
-* File copy command
-* File move command
-* File rename command
-* Nano-style text editor
-* User activity logging
-* Account lockout system
-* Dedicated logger subsystem
-* Virtual path resolution
-* Protected system directories
+* Reserved username protection for "PyOS"
+* Python version validation during boot
+* Quote engine with 501 programming quotes
+* Quote cache system
+* Complete logging subsystem
+* User log management
+* System log management
+* Log statistics
+* Log trimming
+* Automatic log trimming
+* Configurable log limits
+* New data directory
 
-### Changed
+### Improved
 
-* Security architecture redesigned
-* Password handling migrated to PasswordManager
-* Password input migrated to getpass()
-* Logging architecture redesigned
-* Configuration management improved
-* Filesystem architecture redesigned
-
-### Fixed
-
-* Path traversal vulnerabilities
-* Directory protection bypasses
-* Account lock bugs
-* Logout logger crashes
-* Session handling issues
-* File permission inconsistencies
-* Restart workflow issues
+* Boot process validation
+* Boot performance
+* Theme command error handling
+* User interface consistency
+* Quote reliability
+* Command feedback
 
 ### Security
 
-* Added AccessControl framework
-* Added role-based permissions
-* Added protected file handling
-* Added reserved directory protection
-* Added path validation system
+* Added logger.py protection
+* Improved username validation
+* Strengthened system file protection
+
+### Fixed
+
+* Duplicate user creation messages
+* Configuration inconsistencies
+* Quote cache issues
+* Logging edge cases
+* Multiple UI/UX issues
 
 ---
 
@@ -742,6 +996,19 @@ PyOS uses a dedicated bootloader process.
 * No kernel-level isolation
 * No app sandboxing yet
 * Backup system still in development
+
+---
+
+# 📚 Quote Database Attribution
+
+PyOS includes a programming quote dataset containing quotes from various authors in computer science and software engineering.
+
+All quotes remain the intellectual property of their respective authors.
+
+The dataset is used for educational and non-commercial purposes.
+
+Dataset Source:
+[GitHub URL](https://github.com/mudroljub/programming-quotes-api)
 
 ---
 

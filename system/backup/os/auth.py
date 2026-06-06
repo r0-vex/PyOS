@@ -4,6 +4,7 @@ import time
 import fs,security
 from logger import Logger
 import getpass
+import sys
 
 class TooShort(Exception):
      pass
@@ -87,7 +88,7 @@ def validate_username(mode="user"):
             if user_name=="":
                 sys_log.warning("Username Invalid!")
                 continue
-            elif user_name.lower() in ["root","admin","system","user","users","null"]:
+            elif user_name.lower() in ["root","admin","system","user","users","null","pyos"]:
                  raise ReservedWord
             elif 8>len(user_name):
                 raise TooShort
@@ -232,14 +233,9 @@ class account_creation():
                 fs.user_files_creation.create_user_files(u_name,security.SYSTEM_ROLE)
                 dump_data()
                 sys_log.info(f"{u_name} :User created successfully.")
-                print("User created successfully. ",end="")
-                for _ in range(3):
-                    time.sleep(0.5)
-                    print(". ",end="",flush=True)
-                print()
                 return True
             else:
-                sys_log.error("No. of users limit: 5 Exceeded")
+                sys_log.error(f"No. of users limit: {auth_py_config["allowed_users"]} Exceeded")
                 return False
         except Exception as CreationError:
             sys_log.error("ERROR 1b: "+str(CreationError))
@@ -301,8 +297,10 @@ class login():
                 sys_log.error("ERROR 1h: User Not Found")
             return False
         except KeyboardInterrupt:
+            print()
             sys_log.error("ERROR 1k: Forced Shutdown")
-            return False
+            time.sleep(2)
+            sys.exit()
         except Exception as LoginError:
                 sys_log.error("ERROR 1i: "+str(LoginError))
     

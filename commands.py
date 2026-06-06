@@ -20,6 +20,9 @@ config_path=user_log=cmd_py_config=None
 sys_log=Logger.system()
 sys_config_path=os.path.join(os.getcwd(),"system","config.json")
 
+quotes=None
+quotes_cache=None
+
 class InvalidApp(Exception):
     pass
 
@@ -34,10 +37,10 @@ def get_config_path():
     return os.path.join(os.getcwd(),auth.login.user_dir,"system","config.json")
 
 def assign():
-        global user_log,config_path,cmd_py_config
-        user_log=get_user_log()
-        config_path=get_config_path()
-        cmd_py_config=load_data(None)
+    global user_log,config_path,cmd_py_config
+    user_log=get_user_log()
+    config_path=get_config_path()
+    cmd_py_config=load_data(None)
 
 def load_data(args):
     global cmd_py_config
@@ -148,32 +151,57 @@ def mood(args):
     return f"{cmd_py_config['pet_name']} is feeling "+random.choice(moods)
 
 def quote(args):
-    quotes=['“Talk is cheap. Show me the code.”',
-            '“Programmer: A machine that turns coffee into code.”',
-            '“It’s not a bug; it’s an undocumented feature.”',
-            '“If, at first, you do not succeed, call it version 1.0.”',
-            '“Software is like sex: it’s better when it’s free.”',
-            '“Don’t comment bad code – rewrite it.”',
-            '“Make it work, make it right, make it fast.”',
-            '“Code is read much more often than it is written.”',
-            '“Code is like humor. When you have to explain it, it’s bad.”',
-            '“Before software can be reusable, it first has to be usable.”',
-            '“Fix the cause, not the symptom.”',
-            '“There is always one more bug to fix.”',
-            '“Experience is the name everyone gives to their mistakes.”',
-            '“Programming is learned by writing programs.”',
-            '“In the beginner’s mind, there are many possibilities; in the expert’s mind, there are few.”',
-            '“Confusion is part of programming.”',
-            '“Truth can only be found in one place: the code.”',
-            '“The computer was born to solve problems that did not exist before.”',
-            '“Software comes from heaven when you have good hardware.”',
-            '“Computers are fast; developers keep them slow.”',
-            '“Great Softwares are like wine; it takes time to be good.”',
-            '“If you can read this, thank a Software Developer.”',
-            '“Pasting code from the internet into production code is like chewing gum found in the street.”',
-            '“If the code doesn\'t bother you, don\'t bother it.”'
-            ]
-    return random.choice(quotes)
+    try:
+        quotes_path=os.path.join(os.getcwd(),"system","data","quotes.json")
+        quotes_cache_path=os.path.join(os.getcwd(),"system","data","cache.txt")
+        global quotes,quotes_cache
+        if quotes is None:
+            if os.path.exists(quotes_path):
+                with open(quotes_path,encoding="utf-8") as file:
+                    quotes=json.loads(file.read())
+            else:
+                fallback_quote=['“Talk is cheap. Show me the code.”',
+                '“Programmer: A machine that turns coffee into code.”',
+                '“It’s not a bug; it’s an undocumented feature.”',
+                '“If, at first, you do not succeed, call it version 1.0.”',
+                '“Software is like sex: it’s better when it’s free.”',
+                '“Don’t comment bad code – rewrite it.”',
+                '“Make it work, make it right, make it fast.”',
+                '“Code is read much more often than it is written.”',
+                '“Code is like humor. When you have to explain it, it’s bad.”',
+                '“Before software can be reusable, it first has to be usable.”',
+                '“Fix the cause, not the symptom.”',
+                '“There is always one more bug to fix.”',
+                '“Experience is the name everyone gives to their mistakes.”',
+                '“Programming is learned by writing programs.”',
+                '“In the beginner’s mind, there are many possibilities; in the expert’s mind, there are few.”',
+                '“Confusion is part of programming.”',
+                '“Truth can only be found in one place: the code.”',
+                '“The computer was born to solve problems that did not exist before.”',
+                '“Software comes from heaven when you have good hardware.”',
+                '“Computers are fast; developers keep them slow.”',
+                '“Great Softwares are like wine; it takes time to be good.”',
+                '“If you can read this, thank a Software Developer.”',
+                '“Pasting code from the internet into production code is like chewing gum found in the street.”',
+                '“If the code doesn\'t bother you, don\'t bother it.”'
+                ]
+                return random.choice(fallback_quote)
+        if not os.path.exists(quotes_cache_path):
+            open(quotes_cache_path,"w").close()
+        if quotes_cache is None:
+            with open(quotes_cache_path) as cache_file:
+                quotes_cache=[line.strip() for line in cache_file.readlines()]
+        if len(quotes_cache)>=len(quotes):
+            open(quotes_cache_path,"w").close()
+            quotes_cache=None
+        available_quotes=[q for q in quotes if q["_id"]["$oid"] not in quotes_cache]
+        selected_quote=random.choice(available_quotes)
+        quotes_cache.append(selected_quote["_id"]["$oid"])
+        with open(quotes_cache_path,"a") as cache_file:
+            cache_file.write(selected_quote["_id"]["$oid"]+"\n")
+        return selected_quote["text"]
+    except Exception as QuoteError:
+        user_log.error("Quote Error: "+str(QuoteError))
 
 def sysinfo(args):
     print("System Information:-")
@@ -265,38 +293,46 @@ def apps(args):
         return
 
 def theme(args):
-    themes = {
-        "matrix": {"code": "0a","desc": "Classic hacker green"},
-        "bloodmoon": {"code": "04","desc": "Dark red danger"},
-        "ocean": {"code": "1b","desc": "Cool aqua shell"},
-        "royal": {"code": "5f","desc": "Purple elite"},
-        "ghost":{"code":"08","desc":"Dark Mode"},
-        "sunset":{"code":"60","desc":"Sunset black theme"},
-        "ice":{"code":"1f","desc":"Cold Blue White"},
-        "lava":{"code":"40","desc":"Hot Lava Black"},
-        "neon":{"code":"0d","desc":"Black Magenta Theme"},
-        "default": {"code": "f","desc": "Classic PyOS"}
-    }
-    if not args:
-        print("\nAvailable Themes:-\n")
-        for name, desc in themes.items():
-            print(f"{name.title():<12} : {desc['desc']}")
-        theme=input(f"\nEnter Theme Name: ").lower()
-    if args:
-        theme = args[0].lower()
-    if theme not in themes:
-        return "Theme not found"
-    selected = themes[theme]
-    os.system(f"color {selected['code']}")
-    print(f"\nPreviewing Theme: {theme.upper()}")
-    confirm = input("Apply Theme? (y/n): ")
-    if confirm.lower() != "y":
-        os.system(cmd_py_config["theme"])
-        return "Theme cancelled"
-    # save theme
-    cmd_py_config["theme"] = f"color {selected['code']}"
-    dump_data(None)
-    return f"{theme.title()} theme applied"
+    try:
+        themes = {
+            "matrix": {"code": "0a","desc": "Classic hacker green"},
+            "bloodmoon": {"code": "04","desc": "Dark red danger"},
+            "ocean": {"code": "1b","desc": "Cool aqua shell"},
+            "royal": {"code": "5f","desc": "Purple elite"},
+            "ghost":{"code":"08","desc":"Dark Mode"},
+            "sunset":{"code":"60","desc":"Sunset black theme"},
+            "ice":{"code":"1f","desc":"Cold Blue White"},
+            "lava":{"code":"40","desc":"Hot Lava Black"},
+            "neon":{"code":"0d","desc":"Black Magenta Theme"},
+            "default": {"code": "f","desc": "Classic PyOS"}
+        }
+        if not args:
+            print("\nAvailable Themes:-\n")
+            for name, desc in themes.items():
+                print(f"{name.title():<12} : {desc['desc']}")
+            print("\nType 0 to exit")
+            theme=input(f"\nEnter Theme Name: ").lower()
+            if theme=="0":
+                return "No Theme Selected!"
+        if args:
+            theme = args[0].lower()
+        if theme not in themes:
+            return "Theme not found"
+        selected = themes[theme]
+        os.system(f"color {selected['code']}")
+        print(f"\nPreviewing Theme: {theme.upper()}")
+        confirm = input("Apply Theme? (y/n): ")
+        if confirm.lower() != "y":
+            os.system(cmd_py_config["theme"])
+            return "Theme cancelled"
+        # save theme
+        cmd_py_config["theme"] = f"color {selected['code']}"
+        dump_data(None)
+        return f"{theme.title()} theme applied"
+    except KeyboardInterrupt:
+        return "\nNo Theme Selected!"
+    except Exception as ThemeError:
+        user_log.error("ERROR THEME: "+str(ThemeError))
 
 def cmd(args):
     return f"PyOS [version {get_pyos_ver("ver_name")}]\n(info) Python based kernel os simulator.\n"
@@ -333,7 +369,7 @@ def os_info(args):
     return sys_py_config[os_args[args[0]]]
 
 def py_version(args):
-    return cmd_py_config["python_version"]
+    return sys.version.split()[0]
 
 def uptime(args):
     seconds=time.time()-boot_time
@@ -472,6 +508,320 @@ def move(args):
     dst_target = fs.resolve_virtual_path(auth.login.current_dir,args[1])
     fs.file.move(src_target,dst_target,current_role=auth.login.current_role,current_user=auth.login.current_user)
 
+def logs(args):
+    if not args:
+        return """LOG COMMANDS
+------------
+
+INFO      View logging configuration
+TRIM      Trim logs manually
+CLEAR     Clear log entries
+CONFIG    Displays log configuration
+STATS     Displays log Statistics
+VIEW      Displays the entire log
+SET       Modify log settings
+TAIL      Show last N entries
+
+ADMIN ONLY
+----------
+
+SYSTEM    View system log
+USER      View a user's log
+
+Usage:
+logs <argument>\n"""
+    try:
+        cmd = args[0].lower()
+        user_log_path = os.path.join("users",auth.login.current_user,"system","log.txt")
+        if cmd == "view":
+            if not os.path.exists(user_log_path):
+                user_log.error(f"ERROR LOG: {auth.login.current_user} Log doesn't exist!")
+                return
+            with open(user_log_path) as file:
+                lines = file.readlines()
+            for line in lines:
+                print(line,end="")
+        elif cmd == "tail":
+            if len(args)!=2:
+                return "Usage: logs tail <n>"
+            n=int(args[1])
+            if n <= 0:
+                return "Enter a positive number greater than 0"
+            if not os.path.exists(user_log_path):
+                user_log.error(f"ERROR LOG: {auth.login.current_user} Log doesn't exist!")
+                return
+            with open(user_log_path) as file:
+                lines = file.readlines()[-n:]
+            for line in lines:
+                print(line,end='')
+        elif cmd == "info":
+            if not os.path.exists(user_log_path):
+                user_log.error(f"ERROR LOG: {auth.login.current_user} Log doesn't exist!")
+                return
+            with open(user_log_path) as log_file:
+                lines=log_file.readlines()
+            print("Log Information")
+            print("-"*40)
+            print(f"{'Current User':<12} : {auth.login.current_user}")
+            print(f"{'Entries':<12} : {len(lines)}")
+            print(f"{'Max Log':<12} : {cmd_py_config['max_log']}")
+            print(f"{'Auto Trim':<12} : {'ENABLED' if cmd_py_config['auto_trim'] else 'DISABLED'}")
+            print(f"{'Size':<12} : {(os.path.getsize(user_log_path)/1024):.2f} KB")
+        elif cmd == "clear":
+            if not os.path.exists(user_log_path):
+                user_log.error(f"ERROR LOG: {auth.login.current_user} Log doesn't exist!")
+                return
+            ask=input("Are you sure? (Y/N)=> ")
+            if ask.lower()!="y":
+                return
+            open(user_log_path,"w").close()
+            sys_log.info(f"{auth.login.current_user} Log cleared")
+            return f"{auth.login.current_user} Log cleared"
+        elif cmd == "trim":
+            try:
+                if not os.path.exists(user_log_path):
+                    user_log.error(f"ERROR LOG: {auth.login.current_user} Log doesn't exist!")
+                    return
+                with open(user_log_path) as file:
+                    lines=file.readlines()
+                    len_before_trim=len(lines)
+                if len(lines)<=cmd_py_config["max_log"]:
+                    return "No trimming required"
+                lines=lines[-cmd_py_config["max_log"]:]
+                with open(user_log_path,"w") as file:
+                    file.writelines(lines)
+                return f"Log trimmed from {len_before_trim} to {cmd_py_config['max_log']} entries"
+            except Exception as LogError:
+                user_log.error("ERROR LOG: "+str(LogError))
+        elif cmd == "config":
+                print("LOG CONFIGURATION")
+                print("-"*40)
+                print(f"{'Max Log':<12} : {cmd_py_config['max_log']}")
+                print(f"{'Auto Trim':<12} : {'ENABLED' if cmd_py_config['auto_trim'] else 'DISABLED'}")
+        elif cmd == "set":
+            if len(args)<3:
+                return """logs set max <value>
+logs set trim <on/off>\n"""
+            if args[1]=="max":
+                value=int(args[2])
+                if value < 500:
+                    return "Minimum log limit is 500"
+                cmd_py_config["max_log"]=value
+                dump_data(None)
+                return f"Max Log set to {value}"
+            elif args[1]=="trim":
+                if args[2].lower()=="on":
+                    cmd_py_config["auto_trim"]=True
+                    dump_data(None)
+                    return "Auto Trim turned on"
+                elif args[2].lower()=="off":
+                    cmd_py_config["auto_trim"]=False
+                    dump_data(None)
+                    return "Auto Trim turned off"
+                else:
+                    return "Invalid Argument"
+        elif cmd == "system":
+            if auth.login.current_role!="admin":
+                user_log.error("LOG ACCESS DENIED")
+                return
+            if len(args)<2:
+                return """logs system view
+logs system tail <n>
+logs system clear
+logs system stats\n"""
+            sys_log_path=os.path.join(os.getcwd(),"system","log.txt")
+            if args[1] in ["view","tail","clear","stats","info","trim","set"]:
+                if not os.path.exists(sys_log_path):
+                    sys_log.error("LOG ERROR: System Log doesn\'t exist")
+                    return
+            if args[1]=="set":
+                if len(args)<4:
+                    return """logs system set max <value>
+logs system set trim <on/off>\n"""
+                with open(sys_config_path) as config_file:
+                    py_config_file=json.loads(config_file.read())
+                if args[2]=="max":
+                    value=int(args[3])
+                    if value < 500:
+                        return "Minimum log limit is 500"
+                    py_config_file["max_log"]=value
+                    with open(sys_config_path,"w") as config_file:
+                        json.dump(py_config_file,config_file,indent=4)
+                    return f"Max Log set to {value}"
+                elif args[2]=="trim":
+                    if args[3].lower()=="on":
+                        py_config_file["auto_trim"]=True
+                        with open(sys_config_path,"w") as config_file:
+                            json.dump(py_config_file,config_file,indent=4)
+                        return "Auto Trim turned on"
+                    elif args[3].lower()=="off":
+                        py_config_file["auto_trim"]=False
+                        with open(sys_config_path,"w") as config_file:
+                            json.dump(py_config_file,config_file,indent=4)
+                        return "Auto Trim turned off"
+                    else:
+                        return "Invalid trim Argument"
+            elif args[1]=="view":
+                with open(sys_log_path) as sys_log_file:
+                    lines=sys_log_file.readlines()
+                for line in lines:
+                    print(line,end="")
+            elif args[1]=="clear":
+                ask=input("Are you sure? (Y/N) => ")
+                if ask!="y":
+                    return
+                open(sys_log_path,"w").close()
+                return "System Log cleared"
+            elif args[1]=="stats":
+                with open(sys_log_path) as sys_log_file:
+                    info=error=warning=critical=0
+                    for line in sys_log_file:
+                        if "INFO:" in line:
+                            info+=1
+                        elif "ERROR:" in line:
+                            error+=1
+                        elif "WARNING:" in line:
+                            warning+=1
+                        elif "CRITICAL:" in line:
+                            critical+=1
+                print(f"STATS\n{'-'*10}")
+                print(f"{'INFO':<10} : {info}")
+                print(f"{'ERROR':<10} : {error}")
+                print(f"{'WARNING':<10} : {warning}")
+                print(f"{'CRITICAL':<10} : {critical}")
+                print(f"{'TOTAL':<10} : {info+error+warning+critical}")
+            elif args[1]=="tail":
+                n=int(args[2])
+                if n <= 0:
+                    return "Enter a positive number greater than 0"
+                with open(sys_log_path) as sys_log_file:
+                    lines=sys_log_file.readlines()[-n:]
+                for line in lines:
+                    print(line,end='')
+            elif args[1]=="info":
+                with open(sys_log_path) as log_file:
+                    lines=log_file.readlines()
+                with open(sys_config_path) as info_file:
+                    info_py=json.loads(info_file.read())
+                print("Log Information")
+                print("-"*40)
+                print(f"{'Entries':<12} : {len(lines)}")
+                print(f"{'Max Log':<12} : {info_py['max_log']}")
+                print(f"{'Auto Trim':<12} : {'ENABLED' if info_py['auto_trim'] else 'DISABLED'}")
+                print(f"{'Size':<12} : {(os.path.getsize(sys_log_path)/1024):.2f} KB")
+            elif args[1]=="trim":
+                try:
+                    with open(sys_log_path) as file:
+                        lines=file.readlines()
+                        len_before_trim=len(lines)
+                    with open(sys_config_path) as sys_config_file:
+                        sys_py_config=json.loads(sys_config_file.read())
+                    if len(lines)<=sys_py_config["max_log"]:
+                        return "No trimming required"
+                    lines=lines[-sys_py_config["max_log"]:]
+                    with open(sys_log_path,"w") as file:
+                        file.writelines(lines)
+                    return f"Log trimmed from {len_before_trim} to {sys_py_config['max_log']} entries"
+                except Exception as LogError:
+                    user_log.error("ERROR LOG: "+str(LogError))
+            else:
+                return "Invalid log system argument"
+        elif cmd == "user":
+            if auth.login.current_role!="admin":
+                user_log.error("LOG ACCESS DENIED")
+                return
+            if len(args) < 3:
+                return """
+logs user <username> view
+logs user <username> tail <n>
+logs user <username> stats
+logs user <username> clear
+"""
+            if args[2] not in ["view","tail","stats","clear"]:
+                return "Invalid Argument"
+            with open(sys_config_path) as sys_config:
+                users_list=json.loads(sys_config.read())["users"]
+            if args[1] not in users_list:
+                return "User Not Found"
+            user_path=os.path.join(os.getcwd(),"users",args[1],"system","log.txt")
+            if not os.path.exists(user_path):
+                return "User Log doesn't exist"
+            with open(user_path) as user_log_file:
+                lines=user_log_file.readlines()
+            if args[2]=="view":
+                for line in lines:
+                    print(line,end='')
+            elif args[2]=="stats":
+                info=error=warning=critical=0
+                for line in lines:
+                    if "INFO:" in line:
+                        info+=1
+                    elif "ERROR:" in line:
+                        error+=1
+                    elif "WARNING:" in line:
+                        warning+=1
+                    elif "CRITICAL:" in line:
+                        critical+=1
+                print(f"STATS\n{'-'*10}")
+                print(f"{'INFO':<10} : {info}")
+                print(f"{'ERROR':<10} : {error}")
+                print(f"{'WARNING':<10} : {warning}")
+                print(f"{'CRITICAL':<10} : {critical}")
+                print(f"{'TOTAL':<10} : {len(lines)}")
+            elif args[2]=="clear":
+                if not os.path.exists(user_path):
+                    sys_log.error(f"ERROR LOG: {args[1]} log doesn\'t exist")
+                    return
+                ask=input("Are you sure? (Y/N) => ")
+                if ask!="y":
+                    return
+                open(user_path,"w").close()
+                return f"{args[1]} Log Cleared"
+            elif args[2]=="tail":
+                if len(args)!=4:
+                    return "Usage: logs user <username> tail <n>"
+                n=int(args[3])
+                if n <= 0:
+                    return "Enter a positive number greater than 0"
+                lines=lines[-n:]
+                for line in lines:
+                    print(line,end='')
+            else:
+                return "Invalid log user argument"
+        elif cmd == "stats":
+            if not os.path.exists(user_log_path):
+                user_log.error(f"ERROR LOG: {auth.login.current_user} Log doesn't exist!")
+                return
+            with open(user_log_path) as log_file:
+                info=error=warning=critical=0
+                for line in log_file:
+                    if "INFO:" in line:
+                        info+=1
+                    elif "ERROR:" in line:
+                        error+=1
+                    elif "WARNING:" in line:
+                        warning+=1
+                    elif "CRITICAL:" in line:
+                        critical+=1
+            print(f"STATS\n{'-'*10}")
+            print(f"{'INFO':<10} : {info}")
+            print(f"{'ERROR':<10} : {error}")
+            print(f"{'WARNING':<10} : {warning}")
+            print(f"{'CRITICAL':<10} : {critical}")
+            print(f"{'TOTAL':<10} : {info+error+warning+critical}")
+        else:
+            return "Invalid log argument"
+    except KeyboardInterrupt:
+        return
+    except ValueError:
+        user_log.error("ERROR LOG: Enter A Valid Number")
+    except IndexError:
+        user_log.error("ERROR LOG: Arguments Insufficient")
+    except FileNotFoundError:
+        user_log.error("ERROR LOG: File NOT FOUND")
+    except Exception as LogsError:
+        user_log.error("ERROR LOG: "+str(LogsError))
+
 cmds={"whoami": {"func":whoami,"permission":"user"},
        "clear": {"func":clear,"permission":"user"},
        "date": {"func":_date_,"permission":"user"},
@@ -491,6 +841,7 @@ cmds={"whoami": {"func":whoami,"permission":"user"},
        "petname":{"func":petname,"permission":"user"},
        "whoareu":{"func":whoareu,"permission":"user"},
        "reverse":{"func":reverse,"permission":"user"},
+       "screenfetch":{"func":screenfetch,"permission":"user"},
        "uptime":{"func":uptime,"permission":"user"},
        "run":{"func":run,"permission":"user"},
        "users":{"func":users,"permission":"admin"},
@@ -522,7 +873,7 @@ cmds={"whoami": {"func":whoami,"permission":"user"},
        "cmd":{"func":cmd,"permission":"user"},
        "os":{"func":os_info,"permission":"user"},
        "apps":{"func":apps,"permission":"user"},
-       "screenfetch":{"func":screenfetch,"permission":"user"}
+       "logs":{"func":logs,"permission":"user"}
        }
 
 def execute(cmd):

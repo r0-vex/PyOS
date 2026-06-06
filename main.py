@@ -51,20 +51,19 @@ print()
 print("Checking Python Version. ",end="")
 #checking python version
 try:
-    with open(config_path) as py_sys_config: 
-        py_config=json.loads(py_sys_config.read())
-        version=sys.version.split()[0]
-        py_config["python_version"]=version
-    with open(config_path,"w") as py_sys_config:
-        json.dump(py_config,py_sys_config,indent=4)
-except FileNotFoundError:
-                sys_log.error("ERROR 0p: Unable to find version")
+    required=(3,10)
+    current=sys.version_info[:2]
+    if current<required:
+        print("FAILED")
+        sys_log.critical(f"Python {required[0]}.{required[1]}+ required")
+        time.sleep(2)
+        sys.exit()
 except Exception as VersionError:
-                sys_log.error("ERROR 0p: "+str(VersionError))
-for _ in range(5):
+    sys_log.error("ERROR 0p: "+str(VersionError))
+for _ in range(3):
     time.sleep(0.5)
     print(". ",end="",flush=True)
-print()
+print(f"OK ({sys.version.split()[0]})")
 
 #checking config file
 try:
@@ -79,14 +78,14 @@ try:
         boot_py_config=json.loads(boot_sys_config.read())
         sys_log.info("System Config Loaded Successfully in main.py")
     boot_flag=boot_py_config["boot_flag"]
-    for _ in range(8):
-            time.sleep(0.5)
-            print(". ",end="",flush=True)
-    print()
+    for _ in range(3):
+        time.sleep(0.5)
+        print(". ",end="",flush=True)
+    print("OK")
 #os files
     time.sleep(3)
     print("Loading kernel modules. ",end="")      
-    required_files=["fs.py","commands.py","auth.py","security.py"]
+    required_files=["fs.py","commands.py","auth.py","security.py","logger.py"]
     for file in required_files:
         if not (os.path.isfile(os.path.join(os.getcwd(),file))):
             print(f"{file}: Not Found")
@@ -99,10 +98,10 @@ try:
         fs.file.create_dir("users",SYSTEM_ROLE,None)
         fs.file.create_dir(os.path.join("system","backup","users"),SYSTEM_ROLE,None)
     sys_log.info("OS files loaded.")
-    for _ in range(8):
+    for _ in range(3):
         time.sleep(0.5)
         print(". ",end="",flush=True)
-    print()  
+    print("OK")  
 #loading apps
     print("Loading apps. ",end="",flush=True)
     if not (os.path.isdir(os.path.join(os.getcwd(),"apps"))):
@@ -114,7 +113,19 @@ try:
     for _ in range(3):
          time.sleep(0.5)
          print(". ",end="",flush=True)
-    print()
+    print("OK")
+#trimming logs
+    print("Detecting and Trimming System logs . . . ",end='')
+    auto_trim,max_log=boot_py_config["auto_trim"],boot_py_config["max_log"]
+    if auto_trim:
+        path=os.path.join(os.getcwd(),"system","log.txt")
+        log_flag=Logger.trim_log(path,max_log,sys_log)
+        if log_flag:
+            print("OK")
+        else:
+            print("SKIPPED")
+    else:
+        print("SKIPPED")
 except FileNotFoundError:
     sys_log.critical("ERROR 0: Unable to boot")
     sys.exit()
@@ -171,9 +182,10 @@ if __name__=="__main__":
                 with open(os.path.join(os.getcwd(),auth.login.user_dir,"system","config.json")) as load_user_config:
                     user_config=json.loads(load_user_config.read())
                     os.system(user_config["theme"])
-                    user_config["python_version"]=version
-                with open(os.path.join(os.getcwd(),auth.login.user_dir,"system","config.json"),"w") as py_user_config:
-                    json.dump(user_config,py_user_config,indent=4)
+                    user_auto_trim,user_max_log=user_config["auto_trim"],user_config["max_log"]
+                    if user_auto_trim:
+                        path=os.path.join(os.getcwd(),"users",curr_user,"system","log.txt")
+                        Logger.trim_log(path,user_max_log,user_log)
                 if auth.login.current_user and auth.login.current_role!="admin":
                     locked=user_config["locked"]
                     lock=user_config["lock_until"]
@@ -248,7 +260,6 @@ if __name__=="__main__":
                         user_config=json.loads(load_user_config.read())
                     user_config["lock_until"]=time.time()+300
                     user_config["locked"]=True
-                    user_config["version"]=version
                     with open(os.path.join(os.getcwd(),"users",auth.login.current_user,"system","config.json"),"w") as py_user_config:
                         json.dump(user_config,py_user_config,indent=4)
                     user_log.critical("OS set to Locked!")
