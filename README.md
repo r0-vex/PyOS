@@ -1,8 +1,22 @@
-![Version](https://img.shields.io/badge/version-v3.2.1-blue)
+![Version](https://img.shields.io/badge/version-v3.2.2-blue)
 ![Python](https://img.shields.io/badge/python-3.10+-green)
 ![Status](https://img.shields.io/badge/status-active-success)
 
-# 🚀 PyOS v3.2.1
+## 📚 Table of Contents
+
+- Features
+- Authentication System
+- Virtual Filesystem
+- Security Architecture
+- Logging Subsystem
+- Quote Engine
+- Built-in Applications
+- Command Reference
+- Installation
+- Release Notes
+- Roadmap
+
+# 🚀 PyOS v3.2.2
 
 > A Python-based Operating System Simulator built entirely from scratch.
 
@@ -115,7 +129,7 @@ Can:
 
 ## 📜 Logging Subsystem
 
-PyOS v3.2.1 introduces a complete logging framework.
+PyOS includes a complete logging framework introduced in v3.2.1 and expanded in later releases.
 
 ### Log Types
 
@@ -174,6 +188,8 @@ Features:
 
 * Random quote generation
 * Quote cache system
+* Quote author name display
+* Quote statistics (`quote stats`)
 * No duplicate quotes until all quotes are exhausted
 * Automatic cache reset
 * Fallback quote protection
@@ -259,7 +275,7 @@ PyOS:/users/Rohith/home>
 
 ### 🔐 Account Lockout Protection
 
-After 5 failed login attempts, PyOS automatically locks the account and requires administrator intervention.
+After 5 failed login attempts, PyOS automatically locks the account and requires administrator intervention. Displays real-time MM:SS countdown until unlock.
 
 ![Account Lockout](screenshots/login-lockout.png)
 
@@ -450,8 +466,14 @@ deldir <directory>
 
 ### readf
 
-Reads a text file.
+Reads supported text-based files.
 
+Supported Formats:
+`.txt`
+`.log`
+`.json`
+`.md`
+`.csv`
 ```bash
 readf <filename>
 ```
@@ -491,8 +513,9 @@ edit <filename>
 Editor commands:
 
 ```text
-:wq   Save and Exit
-:q    Exit Without Saving
+:wq     Save and Exit
+:q      Exit Without Saving
+:help   Show Editor Help
 ```
 
 ---
@@ -545,8 +568,13 @@ move notes.txt archive.txt
 
 Displays available commands.
 
+Examples:
 ```bash
 help
+help fs
+help logs
+help admin
+help all
 ```
 
 ---
@@ -922,45 +950,80 @@ PyOS uses a dedicated bootloader process.
 
 # 📜 Release Notes
 
-## PyOS v3.2.1
+## PyOS v3.2.2
+## Added
 
-### Added
+### Help System Overhaul
 
-* Reserved username protection for "PyOS"
-* Python version validation during boot
-* Quote engine with 501 programming quotes
-* Quote cache system
-* Complete logging subsystem
-* User log management
-* System log management
-* Log statistics
-* Log trimming
-* Automatic log trimming
-* Configurable log limits
-* New data directory
+* Redesigned help command with categorized command groups
+* Added category-specific help pages
+* Added help aliases (`fs`, `log`, `app`, etc.)
+* Improved command discoverability
 
-### Improved
+### Quote Engine Improvements
 
-* Boot process validation
-* Boot performance
-* Theme command error handling
-* User interface consistency
-* Quote reliability
-* Command feedback
+* Added `quote stats`
+* Added quote author name display
+* Added quote cache statistics
+* Added author display for quotes
 
-### Security
+---
 
-* Added logger.py protection
-* Improved username validation
-* Strengthened system file protection
+## Improved
 
-### Fixed
+### File Reading
 
-* Duplicate user creation messages
-* Configuration inconsistencies
-* Quote cache issues
-* Logging edge cases
-* Multiple UI/UX issues
+* Improved `readf` extension handling
+* Automatic `.txt` extension detection
+* Added support for multiple readable file formats
+* Improved error messages
+
+### Editor
+
+* Improved automatic file extension detection
+* Added `:help` editor command
+* Improved editor usability
+* Various editor bug fixes
+
+### Security & Lockout
+
+* Improved lockout countdown display
+* Added seconds-level precision to remaining lock time
+
+### User Interface
+
+* Improved Python version display (`pyver`)
+* Improved help output formatting
+* Improved logging error messages
+* General command output consistency improvements
+
+---
+
+## Fixed
+
+* Quote cache edge cases
+* Redundant quote handling logic
+* Multiple editor-related bugs
+* Logging message inconsistencies
+* Removed redundant code paths
+* Various minor stability fixes
+
+---
+
+## Internal Changes
+
+* Added centralized extension allow/block lists
+* Refactored file handling validation
+* Improved command organization
+* General code cleanup and maintenance
+
+---
+
+## Performance
+
+No major performance changes.
+
+Focus of v3.2.2 was stability, usability, and command quality-of-life improvements.
 
 ---
 
@@ -968,11 +1031,11 @@ PyOS uses a dedicated bootloader process.
 
 ## v3.3
 
-* tree command
-* find command
-* count command
-* search command
-* manual pages
+* `tree` command
+* `find` command
+* `count` command
+* `search` command
+* manual pages (`man`)
 
 ## v3.4
 

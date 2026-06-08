@@ -26,7 +26,9 @@ class UserLogger:
         user_log.warning(details)
 
 PyOS_path=os.getcwd()
-whitelist_ext=[".txt",".json",".csv",".py",".bin"]
+whitelist_ext=(".txt",".json",".csv",".py",".bin")
+unsupported_ext_by_edit = (".bin",".exe",".dll",".dat")
+supported_read_extensions = (".txt",".log",".json",".md",".csv")
 SYSTEM_ROLE="PyOS"
 
 sys_log=Logger.system()
@@ -106,7 +108,7 @@ class file:
             if "." not in os.path.basename(safe):
                 safe += ".txt"
             if not (os.path.exists(safe)):
-                if safe.endswith(tuple(whitelist_ext)):
+                if safe.endswith(whitelist_ext):
                     open(safe,"w").close()
                     print(os.path.basename(safe)+" File Created")
                     sys_log.info(safe+" File Created")
@@ -163,17 +165,20 @@ class file:
             safe=security.AccessControl.authorize(path,current_role,current_user)
             if safe is None:
                 return
+            if "." not in os.path.basename(safe):
+                safe += ".txt"
             if not os.path.exists(safe):
-                sys_log.error("File not found")
+                sys_log.error(f"READ ERROR: {path} not found")
                 return
             if not os.path.isfile(safe):
-                sys_log.error("Not a file")
+                sys_log.error(f"{path} Not a file")
                 return
-            if not safe.endswith(".txt"):
-                sys_log.error("Unsupported format")
+            if not safe.endswith(supported_read_extensions):
+                sys_log.error(f"{path} Unsupported format")
                 return
             with open(safe) as temp_reader:
                 temp_py_reader=temp_reader.readlines()
+            UserLogger.action("READ",path)
             if mode=="-l":
                 for count,line in enumerate(temp_py_reader):
                     print(f"{count+1} | {line}",end='')
@@ -182,7 +187,6 @@ class file:
             for line in temp_py_reader:
                 print(line,end='')
             print()
-            UserLogger.action("READ",path)
             return
         except Exception as ReadError:
             sys_log.error("ERROR 2g: "+str(ReadError))
@@ -192,7 +196,7 @@ class file:
             safe=security.AccessControl.authorize(path,current_role,current_user,"write")
             if safe is None:
                 return
-            if os.path.isfile(safe) and safe.endswith(tuple(whitelist_ext)):
+            if os.path.isfile(safe) and safe.endswith(whitelist_ext):
                 line=""
                 for w_no,word in enumerate(content):
                     if w_no!=len(content)-1:
@@ -215,8 +219,11 @@ class file:
                 print("Given arg is a Directory")
                 return
             new_file=False
+            modified=False
+            if "." not in os.path.basename(safe):
+                safe += ".txt"
             if not os.path.isfile(safe):
-                if not safe.endswith(".bin"):
+                if not safe.endswith(unsupported_ext_by_edit):
                     open(safe,"w").close()
                     sys_log.info(f"{safe} file created")
                     new_file=True
@@ -234,22 +241,40 @@ class file:
                 print(f"{os.path.basename(safe)}")
             print("\nPyOS Nano Editor")
             print("Type ':wq' to save and exit")
-            print("Type ':q' to exit\n")
+            print("Type ':q' to exit")
+            print("Type ':help' to show Editor Help")
             if not new_file:
                 for no,line in enumerate(buffer):
                     print(f"{no+1} | {line}",end="")
+            line_no=len(buffer)+1
+            print("\n"+'-'*40)
             while True:
-                line = input("> ")
+                line = input(f"{line_no}> ")
                 if line.strip() == ":wq":
+                    if not modified:
+                        print("No changes made.")
+                        return
                     with open(safe,"w") as writer:
                         writer.writelines(buffer)
-                    print("Saved.")
+                    print(f"Saved {len(buffer)} lines.")
                     UserLogger.action("EDIT",path)
                     return
                 if line.strip() == ":q":
+                    if modified:
+                        ask=input("Unsaved changes detected. Exit? (Y/N)=> ")
+                        if ask.lower()!="y":
+                            continue
                     print("Exited.")
                     return
+                if line.strip()==":help":
+                    print(f"EDITOR COMMANDS\n{'-'*20}")
+                    print(f"{':wq':<10} Save & Exit")
+                    print(f"{':q':<10} Exit")
+                    print(f"{':help':<10} Show Help")
+                    continue
                 buffer.append(line + "\n")
+                modified=True
+                line_no+=1
         except Exception as EditError:
             sys_log.error("ERROR EDIT: "+ str(EditError))
         

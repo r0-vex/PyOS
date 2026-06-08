@@ -1,7 +1,7 @@
 {
     "os_name": "PyOS",
     "version": "v3.0",
-    "version_name": "3.2.1",
+    "version_name": "3.2.2",
     "kernel": "IDLE / cmd",
     "languages_used": "Python and JSON",
     "booted_on": "",

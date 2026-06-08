@@ -21,7 +21,82 @@ sys_log=Logger.system()
 sys_config_path=os.path.join(os.getcwd(),"system","config.json")
 
 quotes=None
-quotes_cache=None
+quotes_cache=[]
+
+help_data = {
+    "utility": {
+        "whoami": "Display current user",
+        "date": "Display current date",
+        "time": "Display current time",
+        "day": "Display current day",
+        "clear": "Clear terminal screen",
+        "echo": "Print text",
+        "quote": "Display random quote",
+        "mood": "Display random mood",
+        "reverse": "Reverse text",
+        "cal": "Display calendar",
+        "roll": "Roll a dice",
+        "coin": "Flip a coin",
+        "petname": "Generate pet name",
+        "whoareu": "About PyOS",
+        "uptime": "Display uptime",
+        "pyver": "Display Python version",
+        "cmd": "Display command's prompt message",
+        "greet": "Display greeting"
+    },
+
+    "system": {
+        "sysinfo": "Display system information",
+        "screenfetch": "Display PyOS banner",
+        "os": "Display OS information",
+        "theme": "Change theme",
+        "shutdown": "Shutdown PyOS",
+        "restart": "Restart PyOS",
+        "logout": "Logout current user"
+    },
+
+    "filesystem": {
+        "ls": "List directory contents",
+        "pwd": "Print working directory",
+        "sd": "Change directory",
+        "crdir": "Create directory",
+        "deldir": "Delete directory",
+        "cr": "Create file",
+        "readf": "Read file",
+        "writef": "Write file",
+        "edit": "Edit file",
+        "copy": "Copy file",
+        "move": "Move file",
+        "rename": "Rename file",
+        "del": "Delete file"
+    },
+
+    "applications": {
+        "apps": "List installed applications",
+        "run": "Run application"
+    },
+
+    "logging": {
+        "logs": "Log management subsystem"
+    },
+
+    "admin": {
+        "users": "List users",
+        "adduser": "Create user"
+    }
+}
+
+help_aliases = {
+    "fs": "filesystem",
+    "file": "filesystem",
+    "app": "applications",
+    "apps": "applications",
+    "log": "logging",
+    "logs": "logging",
+    "util": "utility",
+    "utils":"utility",
+    "sys": "system"
+}
 
 class InvalidApp(Exception):
     pass
@@ -119,12 +194,37 @@ def greet(args):
     return "Welcome "+whoami(args)
 
 def help(args):
-    print("Available Commands:-")
-    for commands,commands_dict in cmds.items():
-        if commands_dict["permission"]=="admin" and auth.login.current_role!="admin":
-            continue
-        print(commands)
-    return " "
+    if not args:
+        print("HELP CATEGORIES")
+        print("="*40)
+        for category, commands in help_data.items():
+            print(
+                f"{category.upper():<15}"
+                f" ({len(commands)} Commands)"
+            )
+        print("\nUsage:")
+        print("help <category>")
+        print("help all")
+        return
+    category = args[0].lower()
+    if category in help_aliases:
+        category = help_aliases[category]
+    if category == "all":
+        for cat, commands in help_data.items():
+            print(f"\n{cat.upper()} COMMANDS")
+            print("="*40)
+            for cmd, desc in commands.items():
+                print(f"{cmd:<12} {desc}")
+        return
+    if category in help_data:
+        print(f"{category.upper()} COMMANDS")
+        print("="*40)
+        for cmd, desc in help_data[category].items():
+            print(f"{cmd:<12} {desc}")
+        return
+    return (
+    "Invalid help category\n"
+    "Use 'help' to view available categories")
 
 def echo(args):
     return " ".join(args)
@@ -188,18 +288,20 @@ def quote(args):
                 return random.choice(fallback_quote)
         if not os.path.exists(quotes_cache_path):
             open(quotes_cache_path,"w").close()
-        if quotes_cache is None:
+        if not quotes_cache:
             with open(quotes_cache_path) as cache_file:
                 quotes_cache=[line.strip() for line in cache_file.readlines()]
         if len(quotes_cache)>=len(quotes):
             open(quotes_cache_path,"w").close()
-            quotes_cache=None
+            quotes_cache=[]
+        if len(args)==1 and args[0].lower()=="stats":
+            return f"QUOTE STATS\n{'-'*20}\n{'Total Quotes':<15} : {len(quotes)}\n{'Used Quotes':<15} : {len(quotes_cache)}\n{'Remaining':<15} : {len(quotes)-len(quotes_cache)}"
         available_quotes=[q for q in quotes if q["_id"]["$oid"] not in quotes_cache]
         selected_quote=random.choice(available_quotes)
         quotes_cache.append(selected_quote["_id"]["$oid"])
         with open(quotes_cache_path,"a") as cache_file:
             cache_file.write(selected_quote["_id"]["$oid"]+"\n")
-        return selected_quote["text"]
+        return f"{selected_quote['text']}\n- {selected_quote['author']}\n"
     except Exception as QuoteError:
         user_log.error("Quote Error: "+str(QuoteError))
 
@@ -369,7 +471,7 @@ def os_info(args):
     return sys_py_config[os_args[args[0]]]
 
 def py_version(args):
-    return sys.version.split()[0]
+    return f"Installed Python Version: {sys.version.split()[0]}"
 
 def uptime(args):
     seconds=time.time()-boot_time
@@ -814,7 +916,8 @@ logs user <username> clear
     except KeyboardInterrupt:
         return
     except ValueError:
-        user_log.error("ERROR LOG: Enter A Valid Number")
+        print("Enter a valid number\nUsage: logs tail <n>")
+        return
     except IndexError:
         user_log.error("ERROR LOG: Arguments Insufficient")
     except FileNotFoundError:

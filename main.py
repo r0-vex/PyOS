@@ -192,7 +192,10 @@ if __name__=="__main__":
                 else:
                     lock,locked=0,False
                 if time.time() < lock or locked:
-                    print(f"\nRemaining Time: {(lock-time.time())//60}m")
+                    remaining = int(lock - time.time())
+                    minutes=remaining // 60
+                    seconds=remaining % 60
+                    print(f"\nRemaining Time: {minutes:02}m:{seconds:02}s")
                     user_log.critical("OS Locked!")
                     sys_log.critical(f"{auth.login.current_user} OS Locked!")
                     print("Use Admin Password to Remove lock")
